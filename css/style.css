@@ -1,0 +1,411 @@
+/* Navbar link visibility tweaks */
+.navbar-nav .nav-link {
+  font-weight: 700; /* Make Home/Products/About us bold */
+}
+
+/* Improve legibility on small screens */
+@media (max-width: 576px) {
+  .navbar-nav .nav-link {
+    font-size: 1.05rem; /* Slightly larger text for mobile */
+    letter-spacing: 0.2px; /* Minor spacing for clarity */
+  }
+}
+
+/* Ensure the expanded mobile menu sits on a solid background */
+@media (max-width: 992px) {
+  .navbar-collapse {
+    background-color: rgba(248, 249, 250, 0.95); /* near bg-light */
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.08);
+  }
+
+  /* Higher contrast links on mobile menu */
+  .navbar-light .navbar-nav .nav-link {
+    color: #35393d;
+  }
+  .navbar-light .navbar-nav .nav-link:hover,
+  .navbar-light .navbar-nav .nav-link.active {
+    color: #000;
+  }
+}
+
+/* Make fixed navbar slightly opaque to improve contrast over hero */
+.fixed-navbar {
+  background-color: rgba(248, 249, 250, 0.9); /* Bootstrap bg-light tone */
+  backdrop-filter: saturate(120%) blur(3px);
+}
+/* css/style.css
+   Updated: improve mobile image size by increasing viewer height and switching
+   to height-first scaling on small screens so portrait images occupy more space.
+   Replace your css/style.css with this file and hard-refresh the page.
+*/
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+.penguin-logo { width: 200px; }
+
+/* Price / info / buttons */
+.penguin-info { display: block; margin-left: auto; margin-right: auto; margin-top: 10%; }
+.penguin-card-border, .penguin-card-img { border-radius: 1em; }
+.price-text-style { color: rgb(237, 158, 12); font-weight: bold; }
+.penguin-card-footer, .penguin-card-border { background-color: white; border: 0; }
+.penguin-btn { background-color: hsl(124, 88%, 29%); color: white; }
+.footer-section { background-color: hsla(218, 55%, 71%, 0.621); padding: 3% 1% 1% 1%; }
+
+/* IMAGE / CAROUSEL
+   Desktop: show full image, reduce left/right gap by preferring width-first scaling.
+   Mobile: increase viewer height and prefer height-first scaling so portrait images appear larger.
+*/
+:root {
+  --product-img-height-desktop: 320px;
+  --product-img-height-mobile: 340px; /* increased for better mobile visibility */
+  --product-image-padding-desktop: 0;  /* kept minimal */
+  --product-image-padding-mobile: 4px; /* slight padding on mobile */
+}
+
+.product-media {
+  height: var(--product-img-height-desktop);
+  max-height: var(--product-img-height-desktop);
+  overflow: hidden;
+  background-color: #f4f7f6;
+  padding: var(--product-image-padding-desktop);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* needed for indicators/mask positioning */
+}
+
+/* Desktop / tablet: width-first scaling to reduce side gaps while still showing full image */
+.product-media img,
+.carousel-slide-inner img,
+.card-product > img,
+.card-product img.card-img-top {
+  display: block;
+  width: 100%;          /* prefer full-width usage on larger screens */
+  height: auto;         /* preserve aspect ratio */
+  max-height: 100%;     /* don't overflow the product-media height */
+  object-fit: contain;  /* preserve entire image (no cropping) */
+  object-position: center center;
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Carousel layout */
+.product-media .carousel { width: 100%; height: 100%; }
+.product-media .carousel-inner { height: 100% !important; position: relative; overflow: hidden; }
+.product-media .carousel-item { height: 100%; position: relative; }
+.carousel-slide-inner { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+/* Single-image fallback */
+.card-product img.card-img-top,
+.card-product > img {
+  display: block;
+  width: 100%;
+  height: var(--product-img-height-desktop);
+  object-fit: contain;
+  object-position: center center;
+}
+
+/* NAVBAR */
+.fixed-navbar {
+  position: fixed; top: 0; width: 100%; z-index: 999;
+  background: hsla(0, 0%, 100%, 0.018); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.372); height: 80px;
+}
+.navbar-brand-text { font-size: 1.4rem; font-weight: bold; margin-left: 50px; color: #D4AF37; line-height: 1; font-family: 'Cormorant Garamond', serif; }
+
+/* Center brand text across desktop and mobile */
+.navbar .container { position: relative; }
+.navbar .navbar-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-left: 0; /* override any spacing */
+}
+
+/* Place toggler (three lines) on the left for mobile */
+@media (max-width: 992px) {
+  .navbar .navbar-toggler {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Full-width edge-to-edge mobile menu panel below brand */
+  .navbar .navbar-collapse {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 80px; /* align with navbar height */
+    width: 100vw;
+    max-width: 100vw;
+    background: rgba(255, 255, 255, 0.637);
+    border-radius: 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    padding: 12px 16px;
+    z-index: 1000;
+  }
+
+  .navbar .navbar-nav .nav-link {
+    display: block;
+    padding: 12px 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .navbar .navbar-nav .nav-item + .nav-item .nav-link {
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .navbar .dropdown-menu {
+    position: static;
+    float: none;
+    display: none; /* default hidden; Bootstrap toggles */
+    margin: 6px 0 10px;
+    border: none;
+    border-left: 2px solid rgba(0,0,0,0.06);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 6px 8px;
+  }
+
+  .navbar .dropdown-item {
+    padding: 10px 6px;
+    font-weight: 600;
+  }
+}
+
+/* HERO BANNER */
+.hero-banner {
+  height: 50vh;
+  margin-top: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+.hero-banner::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.45); z-index: 1; }
+.hero-banner .content { position: relative; z-index: 2; }
+
+/* Scrolling banners background */
+.hero-banners-strip {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.hero-banners-track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 24px;
+  animation: cd-scroll-x 40s linear infinite;
+}
+.hero-banners-track img {
+  height: 70%;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  filter: saturate(110%);
+}
+
+@keyframes cd-scroll-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Mobile tune: slightly taller images and slower speed */
+@media (max-width: 576px) {
+  /* Make the banner more readable on mobile */
+  .hero-banner {
+    height: 42vh; /* slightly shorter to avoid overlap with content below */
+    margin-top: 72px; /* account for navbar height */
+    padding: 8px 12px; /* breathing room for text */
+  }
+
+  .hero-banner::before {
+    background: rgba(0,0,0,0.55); /* stronger contrast for text */
+  }
+
+  .hero-banners-track img { height: 60%; opacity: 0.85; }
+  .hero-banners-track { animation-duration: 75s; gap: 12px; }
+
+  .hero-title {
+    font-size: 2.2rem; /* down from desktop size */
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .hero-subtitle {
+    font-size: 1.4rem;
+    line-height: 1.2;
+  }
+}
+.hero-title { color: #f5a419; font-size: 3.5rem; font-weight: bold; margin-bottom: 15px; }
+.hero-subtitle { color: rgb(249, 245, 245); font-size: 2rem; font-weight: bold; }
+
+/* Category spacing (intro removed) */
+#products.mt-5.pt-5 { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
+.category-section.container.mt-5 { margin-top: 0.5rem !important; padding-top: 0.25rem !important; border-top: 1px solid rgba(0,0,0,0.04); }
+.category-section h2 { margin-top: 0.25rem; margin-bottom: 0.4rem; line-height: 1.15; }
+
+/* fallback scale for devices where JS won't run */
+@media (hover: hover) and (pointer: fine) {
+  .product-media img, .card-product > img { transition: transform .35s ease; will-change: transform; cursor: zoom-in; }
+  .product-media:hover img, .card-product:hover > img { transform: scale(1.02); }
+}
+
+/* ---- Carousel controls/indicators for in-card viewers ----
+   Hide prev/next controls inside card-product to avoid tall overlay panels.
+   Place indicators (dots) below the image, centered.
+*/
+.card-product .carousel-control-prev,
+.card-product .carousel-control-next {
+  display: none !important; /* hide arrow panels in card grid */
+}
+
+/* Move indicators to bottom center of the product-media */
+.card-product .carousel-indicators {
+  position: absolute;
+  top: auto;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+}
+
+/* default dot */
+.card-product .carousel-indicators [data-bs-target] {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(246, 245, 245, 0.306);
+  border: 1px solid rgba(223, 75, 75, 0.002);
+  opacity: 1;
+  padding: 0;
+  transition: transform .12s ease, background-color .12s ease;
+}
+
+/* active dot */
+.card-product .carousel-indicators .active,
+.card-product .carousel-indicators [aria-current="true"] {
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+
+/* ensure indicator buttons are not intrusive on image */
+.card-product .carousel-indicators button {
+  border: none;
+  outline: none;
+}
+
+/* ---------------- Mobile-specific improvements ----------------
+   Increase viewer height and prefer height-first scaling so portrait images look larger.
+*/
+@media (max-width: 576px) {
+  :root {
+    --product-img-height-desktop: 320px;
+    --product-img-height-mobile: 360px; /* make viewer taller on narrow screens */
+  }
+
+  .product-media {
+    height: var(--product-img-height-mobile);
+    max-height: var(--product-img-height-mobile);
+    padding: var(--product-image-padding-mobile);
+    border-radius: 10px;
+  }
+
+  /* On mobile prefer height-first so portrait images fill more of the viewer */
+  .product-media img,
+  .carousel-slide-inner img,
+  .card-product > img,
+  .card-product img.card-img-top {
+    width: auto;        /* width determined by aspect ratio */
+    height: 100%;       /* fill viewer height */
+    max-width: 100%;
+    object-fit: contain; /* still show full image without cropping */
+    padding: 0;
+  }
+
+  /* Slightly larger dots on mobile for easier tapping */
+  .card-product .carousel-indicators [data-bs-target] { width: 10px; height: 10px; }
+  .card-product .carousel-indicators .active,
+  .card-product .carousel-indicators [aria-current="true"] { width: 14px; height: 14px; }
+
+  /* disable zoom panel on small screens for performance/usability */
+  .cd-zoom-panel { display: none !important; }
+  .cd-zoom-mask { display: none !important; }
+}
+
+/* small-other screens */
+@media (max-width: 767px) {
+  /* keep zoom disabled for tablets/smaller devices */
+  .cd-zoom-panel { display: none !important; }
+  .cd-zoom-mask { display: none !important; }
+}
+
+/* Footer icon brand colors + hover polish
+   Add this file and include it after css/style.css, or paste the rules into css/style.css.
+*/
+
+.footer-section a { text-decoration: none; }
+
+/* Base styling for icons in the footer */
+.footer-section .fa {
+  display: inline-block;
+  transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+  opacity: 0.95;
+}
+
+/* Facebook: official blue */
+.footer-section a[href*="facebook"] .fa,
+.footer-section .fa-facebook,
+.footer-section .fa-facebook-square {
+  color: #1877F2; /* Facebook Blue */
+}
+
+/* Instagram: gradient colored text via background-clip (modern browsers) */
+.footer-section a[href*="instagram"] .fa,
+.footer-section .fa-instagram {
+  background: radial-gradient(circle at 30% 107%,
+    #fdf497 0%, #fdf497 5%,
+    #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* needed for background-clip text */
+  -webkit-text-fill-color: transparent;
+}
+
+/* WhatsApp: green */
+.footer-section a[href*="wa.me"] .fa,
+.footer-section a[href*="whatsapp"] .fa,
+.footer-section .fa-whatsapp {
+  color: #06b947; /* WhatsApp green */
+}
+
+/* Hover: subtle lift + full opacity */
+.footer-section a:hover .fa {
+  transform: translateY(-3px) scale(1.03);
+  filter: brightness(1.03);
+  opacity: 1;
+}
+
+/* Ensure large icon sizing is consistent */
+.footer-section .fa-2x {
+  font-size: 2.6rem; /* adjust if you want bigger/smaller */
+}
