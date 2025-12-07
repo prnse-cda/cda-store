@@ -313,25 +313,12 @@
     });
 
     // attach handlers
-        // Lazy-load product images with limited concurrency + stagger + backoff to mitigate Drive 429
+        // Lazy-load product images with limited concurrency to mitigate Drive 429
         try {
           const imgs = dynamicCatalogRoot.querySelectorAll('.product-media img');
           const queue = [];
           let active = 0;
-          const MAX_CONCURRENT = 3; // lower concurrency to reduce rate limiting
-          const BASE_DELAY_MS = 250; // small stagger between requests
-
-          function retryWithBackoff(fn, attempts = 3, initialDelay = 400) {
-            return new Promise((resolve, reject) => {
-              const tryOnce = (n, delay) => {
-                fn().then(resolve).catch(err => {
-                  if (n <= 1) reject(err);
-                  else setTimeout(() => tryOnce(n-1, delay * 1.8), delay);
-                });
-              };
-              tryOnce(attempts, initialDelay);
-            });
-          }
+          const MAX_CONCURRENT = 6;
 
           function loadNext() {
             if (active >= MAX_CONCURRENT || queue.length === 0) return;
@@ -339,32 +326,16 @@
             const src = img.getAttribute('data-src');
             if (!src) { loadNext(); return; }
             active++;
-            const start = () => new Promise((res, rej) => {
-              // stagger: small randomized delay before starting
-              const jitter = BASE_DELAY_MS + Math.floor(Math.random()*200);
-              setTimeout(() => {
-                img.src = src;
-                img.addEventListener('load', () => res('loaded'), { once: true });
-                img.addEventListener('error', () => rej(new Error('load-error')), { once: true });
-              }, jitter);
-            });
-
-            retryWithBackoff(start, 3, 500).then(() => {
-              active--; loadNext();
-            }).catch(() => {
+            img.src = src;
+            img.addEventListener('load', () => { active--; loadNext(); }, { once: true });
+            img.addEventListener('error', () => {
               const id = extractDriveId(src);
               if (id) {
                 const fallback = `https://drive.google.com/uc?export=view&id=${id}`;
-                // One final attempt with fallback after short delay
-                setTimeout(() => {
-                  img.src = fallback;
-                  img.addEventListener('load', () => { active--; loadNext(); }, { once: true });
-                  img.addEventListener('error', () => { active--; loadNext(); }, { once: true });
-                }, 600);
-              } else {
-                active--; loadNext();
+                setTimeout(() => { img.src = fallback; }, 500);
               }
-            });
+              setTimeout(() => { active--; loadNext(); }, 800);
+            }, { once: true });
           }
 
           const io = new IntersectionObserver((entries) => {
@@ -376,7 +347,7 @@
                 loadNext();
               }
             });
-          }, { rootMargin: '300px 0px', threshold: 0.01 });
+          }, { rootMargin: '200px 0px', threshold: 0.01 });
 
           imgs.forEach(img => io.observe(img));
         } catch (e) {
@@ -498,7 +469,7 @@
       alert('Cart is empty');
       return;
     }
-    if (!cdName.value.trim() || !cdPhone.value.trim() || !cdAddress.value.trim() ||
+    if (!cdName.value.trim() || !cdAddress.value.trim() ||
         !cdCity.value.trim() || !cdPincode.value.trim()) {
       alert('Please fill customer details.');
       return;
@@ -508,7 +479,7 @@
     cart.forEach(it => { msg += `${it.id} (${it.size || 'N/A'}) x ${it.qty}\n`; });
     const total = cart.reduce((s, it) => s + it.price * it.qty, 0);
     msg += `\nTotal: ₹${total}\n\n`;
-    msg += `Customer:\n${cdName.value.trim()}\n${cdPhone.value.trim()}\n${cdAddress.value.trim()}, ${cdCity.value.trim()} - ${cdPincode.value.trim()}\n`;
+    msg += `Customer:\n${cdName.value.trim()}\n${cdAddress.value.trim()}, ${cdCity.value.trim()} - ${cdPincode.value.trim()}\n`;
     const phone = "917907555924";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");

@@ -224,30 +224,54 @@ html, body { height: 100%; }
 @media (max-width: 576px) {
   /* Make the banner more readable on mobile */
   .hero-banner {
-    height: 42vh; /* slightly shorter to avoid overlap with content below */
-    margin-top: 72px; /* account for navbar height */
-    padding: 8px 12px; /* breathing room for text */
+    height: 50vh; /* taller so title + subtitle fit fully */
+    margin-top: 80px; /* match fixed navbar height */
+    padding: 12px 12px 18px; /* extra bottom padding for full visibility */
   }
 
   .hero-banner::before {
-    background: rgba(0,0,0,0.55); /* stronger contrast for text */
+    background: rgba(0,0,0,0.6); /* stronger contrast for text */
   }
 
-  .hero-banners-track img { height: 60%; opacity: 0.85; }
-  .hero-banners-track { animation-duration: 75s; gap: 12px; }
+  .hero-banners-track img { height: 60%; opacity: 0.9; }
+  .hero-banners-track { animation-duration: 45s; gap: 12px; } /* faster, closer to desktop */
 
   .hero-title {
-    font-size: 2.2rem; /* down from desktop size */
-    line-height: 1.15;
-    margin-bottom: 8px;
+    font-size: 2.0rem; /* compact for mobile */
+    line-height: 1.2;
+    margin-bottom: 6px;
   }
   .hero-subtitle {
-    font-size: 1.4rem;
-    line-height: 1.2;
+    font-size: 1.2rem;
+    line-height: 1.25;
   }
 }
+
+/* iPhone 13/14/15 sizes (portrait) fine-tuning */
+@media (max-width: 428px) and (min-height: 800px) {
+  .hero-banner { height: 56vh; margin-top: 80px; padding: 12px 12px 20px; }
+  .hero-title { font-size: 1.9rem; line-height: 1.15; margin-bottom: 6px; }
+  .hero-subtitle { font-size: 1.15rem; line-height: 1.25; }
+  .hero-banners-track { animation-duration: 40s; }
+}
+
+/* Slightly smaller width (e.g., iPhone 13 non-max) */
+@media (max-width: 390px) and (min-height: 780px) {
+  .hero-banner { height: 58vh; }
+  .hero-title { font-size: 1.8rem; }
+  .hero-subtitle { font-size: 1.1rem; }
+}
+
+/* Galaxy S21 portrait (approx 412x915) */
+@media (max-width: 412px) and (min-height: 800px) {
+  .hero-banner { height: 60vh; margin-top: 80px; padding: 12px 12px 22px; }
+  .hero-banner::before { background: rgba(0,0,0,0.65); }
+  .hero-title { font-size: 1.7rem; line-height: 1.15; margin-bottom: 6px; }
+  .hero-subtitle { font-size: 1.05rem; line-height: 1.25; }
+  .hero-banners-track { animation-duration: 40s; }
+}
 .hero-title { color: #f5a419; font-size: 3.5rem; font-weight: bold; margin-bottom: 15px; }
-.hero-subtitle { color: rgb(249, 245, 245); font-size: 2rem; font-weight: bold; }
+.hero-subtitle { color: #FFFFFF; font-size: 2rem; font-weight: bold; font-family: 'Playfair Display', serif; }
 
 /* Category spacing (intro removed) */
 #products.mt-5.pt-5 { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
