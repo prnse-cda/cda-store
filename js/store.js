@@ -257,45 +257,23 @@
     }
 
     const ordered = categoryOrderFromMap(catMap);
-    // Build in-collections category navigation (mobile select + desktop pills)
+    // Build in-collections category navigation (mobile select + desktop pills) and navbar mobile categories dropdown
     try {
       const navHost = document.getElementById('cd-collections-nav');
+      const mobileDropdownMenu = document.getElementById('cd-mobile-categories-dropdown');
       if (navHost) {
         // Clear previous
         navHost.innerHTML = '';
         const wrapper = document.createElement('div');
         wrapper.innerHTML = `
           <div class="row g-2 align-items-center">
-            <div class="col-12 d-md-none">
-              <select id="cd-category-select" class="form-select"></select>
-            </div>
             <div class="col-12 d-none d-md-block">
               <ul class="nav nav-pills flex-nowrap overflow-auto" id="cd-category-pills" style="gap:.5rem; white-space:nowrap;"></ul>
             </div>
           </div>
         `;
         navHost.appendChild(wrapper);
-
-        const select = navHost.querySelector('#cd-category-select');
         const pills = navHost.querySelector('#cd-category-pills');
-
-        // Populate select (mobile)
-        if (select) {
-          ordered.forEach(name => {
-            const opt = document.createElement('option');
-            opt.value = `cat-${name}`;
-            opt.textContent = name;
-            select.appendChild(opt);
-          });
-          select.addEventListener('change', () => {
-            const id = select.value;
-            const el = document.getElementById(id);
-            if (el) {
-              const section = el.closest('.category-section');
-              (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-        }
 
         // Populate pills (desktop)
         if (pills) {
@@ -317,6 +295,37 @@
             });
             li.appendChild(a);
             pills.appendChild(li);
+          });
+        }
+
+        // Populate mobile navbar categories dropdown
+        if (mobileDropdownMenu) {
+          mobileDropdownMenu.innerHTML = '';
+          ordered.forEach(name => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.className = 'dropdown-item';
+            a.href = `#cat-${name}`;
+            a.textContent = name;
+            a.addEventListener('click', (e) => {
+              e.preventDefault();
+              const id = `cat-${name}`;
+              const el = document.getElementById(id);
+              if (el) {
+                const section = el.closest('.category-section');
+                (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+              // Close dropdown and collapse on mobile
+              try {
+                const collapseEl = document.getElementById('navbarNav');
+                if (collapseEl && typeof bootstrap !== 'undefined') {
+                  const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+                  bsCollapse.hide();
+                }
+              } catch (_) { /* ignore */ }
+            });
+            li.appendChild(a);
+            mobileDropdownMenu.appendChild(li);
           });
         }
       }
