@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Shopping: cdastore.in</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Fonts: Lato for site-wide typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <!-- PapaParse -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Page Structure: Fixed Navbar, Hero, Products, Info Cards, Footer, Scripts -->
+
+    <!-- FIXED NAVBAR -->
+    <!-- Top Navigation: brand, links, mobile dropdown -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-navbar">
+      <div class="container">
+        <!-- Brand: title + small red tagline centered below -->
+        <a class="navbar-brand" href="#">
+          <span class="navbar-brand-text">CATHY'S DREAMY ATTIRE</span>
+          <span class="navbar-brand-subtext text-danger">Stay Cool . Stay You</span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link active" href="#">HOME</a></li>
+            <li class="nav-item"><a class="nav-link active" href="#products">COLLECTIONS</a></li>
+            <li class="nav-item"><a class="nav-link active" href="#about-us">ABOUT US</a></li>
+            <!-- Mobile-only Categories dropdown -->
+            <li class="nav-item dropdown d-lg-none">
+              <a class="nav-link dropdown-toggle" href="#" id="cdCategoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                CATEGORIES
+              </a>
+              <ul id="cd-mobile-categories-dropdown" class="dropdown-menu" aria-labelledby="cdCategoriesDropdown"></ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- HERO BANNER -->
+      <!-- Hero Banner: scrolling image strip + title/subtitle overlay -->
+      <section class="hero-banner">
+        <div class="hero-banners-strip" aria-hidden="true">
+          <div class="hero-banners-track">
+            <img src="assets/images/intro-banner6.png" alt="" />
+            <img src="assets/images/intro-banner-1.png" alt="" />
+            <img src="assets/images/intro-banner-2.png" alt="" />
+            <img src="assets/images/intro-banner-4.png" alt="" />
+            <img src="assets/images/intro-banner-5.png" alt="" />
+            <img src="assets/images/intro-banner-6.png" alt="" />
+            <!-- duplicate for seamless loop -->
+            <img src="assets/images/intro-banner6.png" alt="" />
+            <img src="assets/images/intro-banner-1.png" alt="" />
+            <img src="assets/images/intro-banner-2.png" alt="" />
+            <img src="assets/images/intro-banner-4.png" alt="" />
+            <img src="assets/images/intro-banner-5.png" alt="" />
+            <img src="assets/images/intro-banner-6.png" alt="" />
+          </div>
+        </div>
+        <div class="content">
+          <h1 class="hero-title">Elegant Ethnic Trendy</h1>
+          <h2 class="hero-subtitle">Womens Fashion</h2>
+        </div>
+      </section>
+
+      <!-- PRODUCTS SECTION -->
+      <!-- Products Section: category navigation rendered by store.js -->
+      <section id="products" class="container mt-5 pt-5">
+        <div id="cd-collections-nav" class="mb-3">
+          <!-- Category navigation is rendered here by store.js -->
+        </div>
+      </section>
+
+      <!-- INFO CARDS -->
+      <!-- Info Cards: size chart toggle and exchange policy note -->
+      <section class="container mt-5 pt-5">
+        <div class="row">
+          <div class="col-md-6 px-3">
+            <div class="card mb-3 penguin-card-border shadow">
+              <div class="row g-0">
+                <div class="col-md-3">
+                  <img src="assets/icons/find-icon.png" class="w-50 penguin-info" alt="Find Icon" />
+                </div>
+                <div class="col-md-9">
+                  <div class="card-body">
+                    <h5 class="card-title">Find the Perfect Fit</h5>
+                    <p class="card-text">
+                      Everybody is different, which is why we offer styles for every body.
+                      <!-- Info card: link opens the same modal size chart used in product cards -->
+                      <a href="#" class="ms-1" onclick="window.showSizeChartModal && window.showSizeChartModal(); return false;">View 
+                        Size Chart</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 px-3">
+            <div class="card mb-3 penguin-card-border shadow">
+              <div class="row g-0">
+                <div class="col-md-3">
+                  <img src="assets/icons/exchange-icon.png" class="w-50 penguin-info" alt="Exchange Icon" />
+                </div>
+                <div class="col-md-9">
+                  <div class="card-body">
+                    <h5 class="card-title">Free Exchanges</h5>
+                    <p class="card-text">
+                      One of the many reasons you can shop with peace of mind.
+                      Please read our <a href="policies/refund-policy.html">Return & Refund policy</a>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Inline Script removed: size chart now opens a modal for desktop + mobile -->
+
+      <!-- FOOTER -->
+      <!-- Footer: about, contact, socials, policy links, copyright -->
+      <section class="footer-section">
+        <div class="container pb-5">
+          <div class="row">
+
+            <div id="about-us" class="col-sm pe-5 pt-3">
+              <img src="assets/images/logo.png" alt="" class="penguin-logo img-fluid" />
+              <hr />
+              <p>
+                At <strong>Cathy's Dreamy Attire</strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
+                We specialize in custom designing, personalized outfit customization, and offer a handpicked collection through our exclusive online boutique.
+              </p>
+            </div>
+
+            <div id="contact-us" class="col-sm pe-5 pt-3">
+              <h5>Contact us:</h5>
+              <hr />
+              <p><i class="fa fa-envelope-open"></i> sales@cdastore.in</p>
+              <p><i class="fa fa-phone"></i> +91 7907555924</p>
+            </div>
+
+            <div class="col-sm pe-5 pt-3">
+              <h5>Get in Touch</h5>
+              <hr />
+              <a href="https://www.facebook.com/CathysDreamyAttire/" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-facebook-square fa-2x pe-3"></i>
+              </a>
+              <a href="https://www.instagram.com/cathys_dreamy_attire/" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-instagram fa-2x pe-3"></i>
+              </a>
+              <a href="https://wa.me/917907555924?text=Hello%20Cathy%E2%80%99s%20Dreamy%20Attire" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-whatsapp fa-2x pe-3"></i>
+              </a>
+            </div>
+
+            <div class="col-sm pe-5 pt-3">
+              <h5>Policy Pages</h5>
+              <hr />
+              <ul class="list-unstyled">
+                <li><a href="policies/privacy-policy.html">Privacy Policy</a></li>
+                <li><a href="policies/shipping-policy.html">Shipping Policy</a></li>
+                <li><a href="policies/refund-policy.html">Return & Refund Policy</a></li>
+              </ul>
+            </div>
+
+          </div>
+
+          <footer>
+            <hr />
+            <p class="text-center">
+              © <span id="yearHome"></span> Cathy’s Dreamy Attire® • All Rights Reserved
+            </p>
+          </footer>
+
+          <!-- Inline Script: sets current year in footer -->
+          <script>
+            document.getElementById("yearHome").textContent = new Date().getFullYear();
+          </script>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Core Scripts: Bootstrap, store logic, image zoom (deferred) -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/zoom.js" defer></script>
+
+    <!-- Navbar UX: auto-close mobile menu when clicking outside or selecting a link -->
+    <script>
+      // Auto-close mobile navbar when clicking outside of it
+      (function() {
+        var collapseEl = document.getElementById('navbarNav');
+        var navbar = document.querySelector('nav.navbar');
+        if (!collapseEl || !navbar || typeof bootstrap === 'undefined') return;
+
+        // Close when clicking outside the navbar
+        document.addEventListener('click', function(e) {
+          var isOpen = collapseEl.classList.contains('show');
+          if (!isOpen) return;
+          var clickedInside = e.target.closest('.navbar') || e.target.closest('.navbar-toggler');
+          if (clickedInside) return;
+          try {
+            var bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+            bsCollapse.hide();
+          } catch (_) {
+            collapseEl.classList.remove('show');
+          }
+        }, true);
+
+        // Also close when a nav link is clicked
+        var links = collapseEl.querySelectorAll('.nav-link');
+        links.forEach(function(link){
+          link.addEventListener('click', function(){
+            try {
+              var bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+              bsCollapse.hide();
+            } catch (_) {
+              collapseEl.classList.remove('show');
+            }
+          });
+        });
+      })();
+    </script>
+
+    <!-- Navbar visual: solid background after small scroll or when mobile menu is open -->
+    <script>
+      (function(){
+        var nav = document.querySelector('nav.fixed-navbar');
+        var collapseEl = document.getElementById('navbarNav');
+        if (!nav) return;
+
+        function updateSolid() {
+          var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+          var isOpen = collapseEl && collapseEl.classList.contains('show');
+          // Solid when scrolled beyond 24px or the menu is open on mobile
+          nav.classList.toggle('navbar-solid', y > 24 || !!isOpen);
+        }
+
+        updateSolid();
+        window.addEventListener('scroll', updateSolid, { passive: true });
+        window.addEventListener('resize', updateSolid);
+        if (collapseEl) {
+          collapseEl.addEventListener('shown.bs.collapse', updateSolid);
+          collapseEl.addEventListener('hidden.bs.collapse', updateSolid);
+        }
+      })();
+    </script>
+
+  </body>
+</html>
