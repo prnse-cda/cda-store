@@ -213,6 +213,33 @@ html, body { height: 100%; }
 .hero-banner::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.45); z-index: 1; }
 .hero-banner .content { position: relative; z-index: 2; }
 
+/* Back-to-top floating button */
+#cd-back-to-top {
+  position: fixed;
+  right: 16px;
+  bottom: 20px;
+  z-index: 1200;
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  color: #333;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+#cd-back-to-top:hover { filter: brightness(1.03); }
+#cd-back-to-top i { font-size: 18px; line-height: 1; }
+
+@media (max-width: 576px) {
+  #cd-back-to-top { right: 12px; bottom: 72px; width: 48px; height: 48px; }
+}
+
 /* Scrolling banners background */
 .hero-banners-strip {
   position: absolute;

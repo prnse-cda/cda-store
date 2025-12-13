@@ -611,6 +611,31 @@
 
   fetchCsv();
 
+  // Back-to-top floating button (desktop + mobile)
+  try {
+    let btn = document.getElementById('cd-back-to-top');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'cd-back-to-top';
+      btn.className = 'btn';
+      btn.setAttribute('aria-label', 'Back to top');
+      btn.innerHTML = '<i class="fa fa-angle-up"></i>';
+      document.body.appendChild(btn);
+    }
+    const showThreshold = 300;
+    function updateVisibility(){
+      const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      btn.style.display = y > showThreshold ? 'inline-flex' : 'none';
+    }
+    updateVisibility();
+    window.addEventListener('scroll', updateVisibility, { passive: true });
+    window.addEventListener('resize', updateVisibility);
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  } catch (e) { /* ignore */ }
+
 })();
 
 // ---- Gallery Overlay implementation ----
