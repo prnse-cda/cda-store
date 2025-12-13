@@ -630,6 +630,8 @@
       // reset mobile view state
       setMobileViewVisible(false);
       setMobileCascadeVisible(false);
+      // Also close any mobile zoom overlay that may be open
+      try { if (window.closeMobileZoom) window.closeMobileZoom(); } catch(_) {}
     });
     return overlay;
   }

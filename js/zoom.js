@@ -189,6 +189,12 @@
     mobileOverlay.style.display = 'block';
   }
 
+  function closeMobileZoom() {
+    ensureMobileOverlay();
+    if (!mobileOverlay) return;
+    mobileOverlay.style.display = 'none';
+  }
+
   function attachZoomTo(img) {
     if (!img || img.dataset.cdZoomAttached) return;
     img.dataset.cdZoomAttached = '1';
@@ -341,5 +347,6 @@
   window.cdZoomAttachAll = attachAll;
   // expose mobile zoom open for external triggers (gallery mobile view)
   window.openMobileZoom = openMobileZoom;
+  window.closeMobileZoom = closeMobileZoom;
 
 })();
