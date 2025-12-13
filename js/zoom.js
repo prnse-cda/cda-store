@@ -25,7 +25,8 @@
   const PANEL_VIEWPORT_WIDTH_PCT = 0.55; // max fraction of viewport width for panel
   const PANEL_VIEWPORT_HEIGHT_PCT = 0.75; // max fraction of viewport height for panel
   const GAP = 14;             // gap between cursor/image and panel
-  const SELECTOR = '.product-media img, .card-product > img';
+  // Restrict desktop hover zoom to the overlay only
+  const SELECTOR = '.cd-gallery-desktop .cd-main img';
 
   let panel = null;
 
@@ -63,7 +64,7 @@
       backgroundPosition: '0 0',
       backgroundSize: '0 0',
       pointerEvents: 'none',
-      zIndex: 120000,
+      zIndex: 200000,
       display: 'none',
       backgroundColor: '#fff',
       overflow: 'hidden'
@@ -338,5 +339,7 @@
 
   // public helper to re-attach after manual renders
   window.cdZoomAttachAll = attachAll;
+  // expose mobile zoom open for external triggers (gallery mobile view)
+  window.openMobileZoom = openMobileZoom;
 
 })();
