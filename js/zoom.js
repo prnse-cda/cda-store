@@ -1,7 +1,8 @@
 // js/zoom.js
-// Flipkart-like zoom panel (rectangular) placed to the right/left of the hovered image.
-// Uses natural image resolution when available for crispness.
-// Skip on touch devices.
+// Purpose:
+// - Desktop: show a Flipkart-like magnifier panel beside hovered image in gallery
+// - Mobile: provide a fullscreen pinch/drag zoom overlay
+// - Attach zoom behaviors to gallery desktop image selector
 //
 // Fixes:
 // - PANEL size is now computed responsively and the panel will prefer a square
@@ -16,6 +17,7 @@
 (function () {
   'use strict';
 
+  // Environment: detect touch to switch to mobile overlay behaviors
   const isTouchDevice = !!(window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches);
 
   // Tunables
@@ -49,6 +51,7 @@
     }
   });
 
+  // Create desktop zoom panel (once)
   function createPanel() {
     if (panel) return panel;
     panel = document.createElement('div');
@@ -77,6 +80,7 @@
   let mobileOverlay = null;
   let mobileInner = null;
   let mobileImg = null;
+  // Create mobile fullscreen overlay (once) and wire gestures
   function ensureMobileOverlay() {
     if (mobileOverlay) return mobileOverlay;
     mobileOverlay = document.createElement('div');
@@ -182,6 +186,7 @@
     return mobileOverlay;
   }
 
+  // API: open mobile overlay with given image src
   function openMobileZoom(src) {
     ensureMobileOverlay();
     if (!mobileOverlay || !mobileImg) return;
@@ -189,12 +194,14 @@
     mobileOverlay.style.display = 'block';
   }
 
+  // API: close mobile overlay
   function closeMobileZoom() {
     ensureMobileOverlay();
     if (!mobileOverlay) return;
     mobileOverlay.style.display = 'none';
   }
 
+  // Attach zoom behavior to a single image element
   function attachZoomTo(img) {
     if (!img || img.dataset.cdZoomAttached) return;
     img.dataset.cdZoomAttached = '1';
@@ -312,6 +319,7 @@
     window.addEventListener('resize', onLeave);
   }
 
+  // Attach to all matching images in the document
   function attachAll() {
     if (!isTouchDevice) createPanel();
     const imgs = document.querySelectorAll(SELECTOR);
