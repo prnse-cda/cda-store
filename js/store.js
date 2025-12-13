@@ -3,9 +3,18 @@
 // Kept behavior intact; removed prev/next arrow buttons from small in-card carousels
 // to avoid tall overlay controls in the product grid.
 
-(() => {
-  console.log("store.js loaded (carousel init conflict fix)");
+// store.js
+// Responsibilities:
+// - Fetch products CSV via PapaParse
+// - Build category navigation and product cards
+// - Lazy-load images and open gallery overlays
+// - Manage cart UI/state and WhatsApp checkout
+// - Provide a back-to-top button
 
+(() => {
+  // Bootstrap + runtime guards and setup
+
+  // Data source: published Google Sheets CSV
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9RM9PuEfM9qPbZXALjzYFdGEoBiltayHlPSQlY9yEurdsRIQK1fgTfE-Wofkd821fdqADQ6O08Z4x/pub?gid=0&single=true&output=csv";
 
   const PRODUCTS_SECTION = document.getElementById('products') || null;
@@ -22,6 +31,7 @@
   function formatPrice(v){ const n = Number(String(v).replace(/[^0-9.-]+/g,'')) || 0; return currency.format(n); }
 
   // Floating cart + modal
+  // Floating Cart Button: opens the cart modal and shows item count
   const cartButton = document.createElement("button");
   cartButton.id = "floatingCartBtn";
   cartButton.innerHTML = `<span aria-hidden="true"><i class="fa fa-shopping-cart"></i></span> <span id="cartCountBadge" class="badge bg-danger ms-2" style="display:none">0</span>`;
@@ -37,6 +47,7 @@
     cartButton.style.top = computeCartTop();
   });
 
+  // Cart Modal: lists items, totals, and customer details form
   const modalHtml = `
   <div class="modal fade" id="cdStoreCartModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -98,6 +109,7 @@
   const cdPincode = document.getElementById("cdPincode");
   const cartCountBadge = document.getElementById("cartCountBadge");
 
+  // In-memory state
   let PRODUCTS = {};
   let cart = [];
 
@@ -149,6 +161,7 @@
     return `${prefix}-${cleaned}-${Math.random().toString(36).slice(2,8)}`;
   }
 
+  // Product Card: minimal viewer (first image), name, price, size selector, actions
   function makeCardHTML(p) {
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
@@ -247,6 +260,7 @@
     return [...prioritized, ...withPriorityProducts, ...rest];
   }
 
+  // Render Categories: builds nav pills, mobile dropdown, and product grids
   function renderCategories(productsMap) {
     dynamicCatalogRoot.innerHTML = '';
     const catMap = buildCategoryMapWithMeta(productsMap);
@@ -441,7 +455,7 @@
     });
   }
 
-  // Cart functions
+  // Cart functions: load/save, UI updates, add/remove, checkout
   function loadCart(){ try{ cart = JSON.parse(localStorage.getItem('cd_store_cart')||'[]') || []; }catch(e){ cart = []; } updateCartUI(); }
   function saveCart(){ localStorage.setItem('cd_store_cart', JSON.stringify(cart)); updateCartUI(); }
   function updateCartUI(){ const qty = cart.reduce((s,i)=>s+i.qty,0); if(cartCountBadge){ cartCountBadge.textContent = qty; cartCountBadge.style.display = qty ? 'inline-block' : 'none'; } renderCartItems(); }
@@ -514,6 +528,7 @@
     }
   }
 
+  // Add to Cart: adds item, merges by id+size, optionally opens modal
   function addToCart(id, size, openModal) {
     const p = PRODUCTS[id];
     if(!p) { console.warn('Product not found:', id); return; }
@@ -533,6 +548,7 @@
   function clearCart(){ if(!confirm('Clear your cart?')) return; cart = []; saveCart(); renderCartItems(); }
   function showCartModal(){ const modalEl = document.getElementById('cdStoreCartModal'); if(modalEl) new bootstrap.Modal(modalEl).show(); }
 
+  // Checkout: opens WhatsApp with prefilled order + customer details
   function checkoutViaWhatsApp() {
     if (!cart.length) {
       alert('Cart is empty');
@@ -563,8 +579,9 @@
   cdClearCart.addEventListener('click', clearCart);
   cdCheckoutBtn.addEventListener('click', checkoutViaWhatsApp);
 
+  // CSV -> PRODUCTS map: normalizes fields and builds category/product metadata
   function parseCsv(results) {
-    console.log('CSV parsed, rows:', (results.data || []).length);
+    // parsed
     const rows = results.data || [];
     PRODUCTS = {};
     rows.forEach((row, idx) => {
@@ -600,8 +617,9 @@
     if (window.cdZoomAttachAll) window.cdZoomAttachAll();
   }
 
+  // Fetch CSV from Google Sheets via PapaParse
   function fetchCsv() {
-    console.log('Fetching CSV from', CSV_URL);
+    // fetching CSV
     if (typeof Papa === 'undefined') {
       console.error('PapaParse not found. Ensure papaparse is included in index.html');
       return;

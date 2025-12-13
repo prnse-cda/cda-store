@@ -1,9 +1,9 @@
-/* Navbar link visibility tweaks */
+/* Navbar link visibility tweaks: emphasize nav links */
 .navbar-nav .nav-link {
   font-weight: 700; /* Make Home/Products/About us bold */
 }
 
-/* Improve legibility on small screens */
+/* Improve legibility on small screens: font size and spacing */
 @media (max-width: 576px) {
   .navbar-nav .nav-link {
     font-size: 1.05rem; /* Slightly larger text for mobile */
@@ -30,16 +30,8 @@
   }
 }
 
-/* Make fixed navbar slightly opaque to improve contrast over hero */
-.fixed-navbar {
-  background-color: rgba(248, 249, 250, 0.9); /* Bootstrap bg-light tone */
-  backdrop-filter: saturate(120%) blur(3px);
-}
-/* css/style.css
-   Updated: improve mobile image size by increasing viewer height and switching
-   to height-first scaling on small screens so portrait images occupy more space.
-   Replace your css/style.css with this file and hard-refresh the page.
-*/
+/* (merged below) fixed navbar styles are defined once under NAVBAR section */
+/* Product media: mobile-first scaling improvements for portrait images */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -54,10 +46,7 @@ html, body { height: 100%; }
 .penguin-btn { background-color: hsl(124, 88%, 29%); color: white; }
 .footer-section { background-color: hsla(218, 55%, 71%, 0.621); padding: 3% 1% 1% 1%; }
 
-/* IMAGE / CAROUSEL
-   Desktop: show full image, reduce left/right gap by preferring width-first scaling.
-   Mobile: increase viewer height and prefer height-first scaling so portrait images appear larger.
-*/
+/* IMAGE / CAROUSEL: desktop width-first, mobile height-first scaling */
 :root {
   --product-img-height-desktop: 320px;
   --product-img-height-mobile: 340px; /* increased for better mobile visibility */
@@ -109,7 +98,7 @@ html, body { height: 100%; }
   object-position: center center;
 }
 
-/* NAVBAR */
+/* NAVBAR: positioning and mobile panel styles */
 .fixed-navbar {
   position: fixed; top: 0; width: 100%; z-index: 999;
   background: hsla(0, 0%, 100%, 0.018); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.372); height: 80px;
@@ -199,7 +188,7 @@ html, body { height: 100%; }
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0,0,0,0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* HERO BANNER */
+/* HERO BANNER: scrolling background and title overlay */
 .hero-banner {
   height: 50vh;
   margin-top: 80px;
@@ -267,7 +256,7 @@ html, body { height: 100%; }
   100% { transform: translateX(-50%); }
 }
 
-/* Mobile tune: slightly taller images and slower speed */
+/* Mobile tune: adjust banner sizes and animation */
 @media (max-width: 576px) {
   /* Make the banner more readable on mobile */
   .hero-banner {
@@ -320,7 +309,7 @@ html, body { height: 100%; }
 .hero-title { color: #f5a419; font-size: 3.5rem; font-weight: bold; margin-bottom: 15px; }
 .hero-subtitle { color: #FFFFFF; font-size: 2rem; font-weight: bold; font-family: 'Playfair Display', serif; }
 
-/* Category spacing (intro removed) */
+/* Category spacing: compact spacing and separators */
 #products.mt-5.pt-5 { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
 .category-section.container.mt-5 { margin-top: 0.5rem !important; padding-top: 0.25rem !important; border-top: 1px solid rgba(0,0,0,0.04); }
 .category-section h2 { margin-top: 0.25rem; margin-bottom: 0.4rem; line-height: 1.15; }
@@ -331,10 +320,7 @@ html, body { height: 100%; }
   .product-media:hover img, .card-product:hover > img { transform: scale(1.02); }
 }
 
-/* ---- Carousel controls/indicators for in-card viewers ----
-   Hide prev/next controls inside card-product to avoid tall overlay panels.
-   Place indicators (dots) below the image, centered.
-*/
+/* Carousel indicators: hide arrows; center dots below image */
 .card-product .carousel-control-prev,
 .card-product .carousel-control-next {
   display: none !important; /* hide arrow panels in card grid */
@@ -385,9 +371,7 @@ html, body { height: 100%; }
   outline: none;
 }
 
-/* ---------------- Mobile-specific improvements ----------------
-   Increase viewer height and prefer height-first scaling so portrait images look larger.
-*/
+/* Mobile-specific improvements: taller viewer and height-first scaling */
 @media (max-width: 576px) {
   :root {
     --product-img-height-desktop: 320px;
@@ -430,9 +414,7 @@ html, body { height: 100%; }
   .cd-zoom-mask { display: none !important; }
 }
 
-/* Footer icon brand colors + hover polish
-   Add this file and include it after css/style.css, or paste the rules into css/style.css.
-*/
+/* Footer icon brand colors + hover polish */
 
 .footer-section a { text-decoration: none; }
 
@@ -481,7 +463,7 @@ html, body { height: 100%; }
   font-size: 2.6rem; /* adjust if you want bigger/smaller */
 }
 
-/* ---- Gallery Overlay (desktop + mobile) ---- */
+/* Gallery Overlay (desktop + mobile) */
 .cd-gallery-overlay {
   position: fixed; left: 0; top: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.85);
