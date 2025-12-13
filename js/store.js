@@ -156,27 +156,9 @@
     let mediaHtml = '';
     if (!imgSrcs || imgSrcs.length === 0) {
       mediaHtml = `<div class="product-media"><img data-src="assets/images/logo.png" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
-    } else if (imgSrcs.length === 1) {
-      mediaHtml = `<div class="product-media"><img data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     } else {
-      const carouselId = safeId('cdcarousel', p.id || p.name || Math.random());
-      // indicators (kept) - will appear as small dots in top-left via CSS
-      const indicators = imgSrcs.map((_, i) => `<button type="button" data-bs-target="#${carouselId}" data-bs-slide-to="${i}" ${i===0? 'class="active" aria-current="true"':''} aria-label="Slide ${i+1}"></button>`).join('');
-      const innerItems = imgSrcs.map((src, i) => `
-        <div class="carousel-item ${i===0 ? 'active' : ''}">
-          <div class="carousel-slide-inner">
-            <img data-src="${escapeHtml(src)}" alt="${escapeHtml(p.name)}" loading="lazy" />
-          </div>
-        </div>
-      `).join('');
-      // NOTE: removed prev/next arrow buttons for in-card carousels to avoid tall overlays
-      const carouselHtml = `
-        <div id="${carouselId}" class="carousel slide card-carousel">
-          <div class="carousel-indicators">${indicators}</div>
-          <div class="carousel-inner">${innerItems}</div>
-        </div>
-      `;
-      mediaHtml = `<div class="product-media">${carouselHtml}</div>`;
+      // Show only the first image on the main page (no carousel, no dots)
+      mediaHtml = `<div class="product-media"><img data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     }
 
     const sizeSelectHtml = sizes.length
@@ -184,7 +166,7 @@
       : `<div class="small text-muted">One size</div>`;
 
     return `
-      <div class="card h-100 penguin-card-border shadow rounded card-product">
+      <div class="card h-100 penguin-card-border shadow rounded card-product" data-pid="${escapeHtml(p.id)}">
         ${mediaHtml}
         <div class="card-body d-flex flex-column">
           <div class="d-flex justify-content-between align-items-start mb-2">
@@ -434,6 +416,20 @@
       const selectedSize = sel ? sel.value : null;
       addToCart(id, selectedSize, true);
     }));
+
+    // Product image click -> open gallery (desktop: thumbnail list + hover zoom; mobile: cascade -> fullscreen view)
+    dynamicCatalogRoot.querySelectorAll('.card-product .product-media').forEach(pm => {
+      pm.addEventListener('click', (e) => {
+        const card = pm.closest('.card-product');
+        if (!card) return;
+        const pid = card.getAttribute('data-pid');
+        const prod = pid ? PRODUCTS[pid] : null;
+        if (!prod) return;
+        const imgs = tokenToImageSrcs(prod.image_ids || prod.image || prod.images || '') || [];
+        if (!imgs.length) return;
+        openGalleryOverlay(imgs);
+      });
+    });
   }
 
   // Cart functions
@@ -606,4 +602,134 @@
 
   fetchCsv();
 
+})();
+
+// ---- Gallery Overlay implementation ----
+(function(){
+  const isTouchDevice = !!(window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches);
+  let overlay = null;
+
+  function ensureOverlay(){
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.className = 'cd-gallery-overlay';
+    overlay.innerHTML = `
+      <div class="cd-gallery-header"><button class="cd-gallery-back">Back</button></div>
+      <div class="cd-gallery-desktop" style="display:none">
+        <div class="cd-thumbs"></div>
+        <div class="cd-main"><img alt="" /></div>
+      </div>
+      <div class="cd-gallery-mobile-cascade" style="display:none"></div>
+      <div class="cd-gallery-mobile-dots" style="display:none"></div>
+      <div class="cd-gallery-mobile-view" style="display:none"><img alt="" /></div>
+      <div class="cd-gallery-mobile-thumbs" style="display:none"></div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('.cd-gallery-back').addEventListener('click', () => {
+      overlay.style.display = 'none';
+      // reset mobile view state
+      setMobileViewVisible(false);
+      setMobileCascadeVisible(false);
+      // Also close any mobile zoom overlay that may be open
+      try { if (window.closeMobileZoom) window.closeMobileZoom(); } catch(_) {}
+    });
+    return overlay;
+  }
+
+  function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+
+  function setDesktopVisible(show){ const d = overlay.querySelector('.cd-gallery-desktop'); d.style.display = show ? 'grid' : 'none'; }
+  function setMobileCascadeVisible(show){ const c = overlay.querySelector('.cd-gallery-mobile-cascade'); const dots = overlay.querySelector('.cd-gallery-mobile-dots'); c.style.display = show ? 'block' : 'none'; dots.style.display = show ? 'flex' : 'none'; }
+  function setMobileViewVisible(show){ const v = overlay.querySelector('.cd-gallery-mobile-view'); const t = overlay.querySelector('.cd-gallery-mobile-thumbs'); v.style.display = show ? 'flex' : 'none'; t.style.display = show ? 'flex' : 'none'; }
+
+  function buildDesktop(imgs){
+    const thumbs = overlay.querySelector('.cd-gallery-desktop .cd-thumbs');
+    const mainImg = overlay.querySelector('.cd-gallery-desktop .cd-main img');
+    clear(thumbs);
+    let currentIndex = 0;
+    function setIndex(i){ currentIndex = i; mainImg.src = imgs[i]; thumbs.querySelectorAll('img').forEach((im,ix)=>{ im.classList.toggle('active', ix===i); }); }
+    imgs.forEach((src, i) => {
+      const im = document.createElement('img');
+      im.src = src;
+      im.addEventListener('click', () => setIndex(i));
+      thumbs.appendChild(im);
+    });
+    setIndex(0);
+    // Re-attach zoom to main image (reuse existing hover lens config)
+    if (window.cdZoomAttachAll) window.cdZoomAttachAll();
+  }
+
+  function buildMobileCascade(imgs){
+    const wrap = overlay.querySelector('.cd-gallery-mobile-cascade');
+    const dots = overlay.querySelector('.cd-gallery-mobile-dots');
+    clear(wrap); clear(dots);
+    imgs.forEach((src, i) => {
+      const im = document.createElement('img');
+      im.className = 'cd-cascade-img';
+      im.src = src;
+      im.addEventListener('click', () => openMobileView(imgs, i));
+      wrap.appendChild(im);
+      const dot = document.createElement('div'); dot.className = 'dot'; if (i===0) dot.classList.add('active'); dots.appendChild(dot);
+    });
+  }
+
+  function openMobileView(imgs, index){
+    const viewImg = overlay.querySelector('.cd-gallery-mobile-view img');
+    const tbar = overlay.querySelector('.cd-gallery-mobile-thumbs');
+    setMobileCascadeVisible(false);
+    setMobileViewVisible(true);
+    clear(tbar);
+    let current = index;
+    function setIndex(i){ current = i; viewImg.src = imgs[i]; tbar.querySelectorAll('img').forEach((im,ix)=>{ im.classList.toggle('active', ix===i); }); }
+    imgs.forEach((src, i) => {
+      const ti = document.createElement('img'); ti.src = src; ti.addEventListener('click', () => setIndex(i)); tbar.appendChild(ti);
+    });
+    setIndex(index);
+
+    // Double-tap/Double-click zoom with pan: reuse zoom.js mobile overlay for simplicity
+    viewImg.style.cursor = 'zoom-in';
+    let lastTap = 0;
+    function onActivateZoom(){
+      const src = viewImg.currentSrc || viewImg.src;
+      if (!src) return;
+      // open mobile fullscreen zoom overlay (provided by zoom.js)
+      if (window.openMobileZoom) { window.openMobileZoom(src); return; }
+      // fallback: just toggle a simple scale
+      const cur = viewImg.style.transform || 'scale(1)';
+      const isScaled = cur.includes('scale(2)');
+      viewImg.style.transform = isScaled ? 'scale(1)' : 'scale(2)';
+      viewImg.style.transformOrigin = 'center center';
+    }
+    // Desktop double-click
+    viewImg.addEventListener('dblclick', onActivateZoom);
+    // Mobile double-tap: detect two taps within 300ms on the image using touchend
+    viewImg.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        e.preventDefault();
+        onActivateZoom();
+      }
+      lastTap = now;
+    }, { passive: false });
+    // Fallback: single tap/click also opens zoom overlay on touch devices
+    viewImg.addEventListener('click', (ev) => {
+      const isTouch = !!(window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches);
+      if (isTouch) {
+        ev.preventDefault();
+        onActivateZoom();
+      }
+    });
+  }
+
+  window.openGalleryOverlay = function(imgs){
+    const ov = ensureOverlay();
+    ov.style.display = 'block';
+    if (!isTouchDevice) {
+      setMobileViewVisible(false); setMobileCascadeVisible(false); setDesktopVisible(true);
+      buildDesktop(imgs);
+    } else {
+      setDesktopVisible(false); setMobileViewVisible(false); setMobileCascadeVisible(true);
+      buildMobileCascade(imgs);
+    }
+  };
 })();

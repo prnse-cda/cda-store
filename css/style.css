@@ -433,3 +433,58 @@ html, body { height: 100%; }
 .footer-section .fa-2x {
   font-size: 2.6rem; /* adjust if you want bigger/smaller */
 }
+
+/* ---- Gallery Overlay (desktop + mobile) ---- */
+.cd-gallery-overlay {
+  position: fixed; left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 120010; display: none;
+}
+.cd-gallery-header {
+  position: absolute; left: 12px; top: 12px; z-index: 2;
+}
+.cd-gallery-back {
+  background: rgba(255,255,255,0.92); border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 24px; padding: 6px 12px; font-weight: 600;
+}
+.cd-gallery-desktop {
+  position: absolute; inset: 60px 24px 24px 24px; display: grid;
+  grid-template-columns: 72px 1fr; gap: 16px; align-items: start;
+}
+.cd-gallery-desktop .cd-thumbs { overflow-y: auto; max-height: 100%; }
+.cd-gallery-desktop .cd-thumbs img {
+  display: block; width: 64px; height: 64px; object-fit: cover;
+  border-radius: 6px; margin-bottom: 8px; opacity: 0.85; cursor: pointer;
+}
+.cd-gallery-desktop .cd-thumbs img.active { outline: 2px solid #fff; opacity: 1; }
+.cd-gallery-desktop .cd-main {
+  position: relative; background: #fff; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cd-gallery-desktop .cd-main img { max-width: 100%; max-height: 80vh; object-fit: contain; }
+
+/* Mobile cascade list */
+.cd-gallery-mobile-cascade {
+  position: absolute; inset: 60px 0 60px 0; overflow-y: auto; padding: 0 12px;
+}
+.cd-gallery-mobile-cascade .cd-cascade-img {
+  display: block; width: 100%; height: auto; object-fit: contain;
+  border-radius: 8px; margin-bottom: 16px; background: #fff; padding: 4px;
+}
+.cd-gallery-mobile-dots {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 16px; display: flex; gap: 6px;
+}
+.cd-gallery-mobile-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: #bbb; }
+.cd-gallery-mobile-dots .dot.active { background: #fff; width: 10px; height: 10px; }
+
+/* Mobile fullscreen with thumbs below */
+.cd-gallery-mobile-view {
+  position: absolute; inset: 60px 0 84px 0; display: flex; align-items: center; justify-content: center;
+}
+.cd-gallery-mobile-view img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.cd-gallery-mobile-thumbs {
+  position: absolute; left: 0; right: 0; bottom: 12px; display: flex; gap: 8px; padding: 0 12px; justify-content: center;
+}
+.cd-gallery-mobile-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; opacity: 0.85; }
+.cd-gallery-mobile-thumbs img.active { outline: 2px solid #fff; opacity: 1; }
