@@ -98,6 +98,28 @@
   modalWrapper.innerHTML = modalHtml;
   document.body.appendChild(modalWrapper);
 
+  // Size Chart Modal: shows a size chart image with close (X) button for desktop + mobile
+  const sizeChartModalHtml = `
+  <div class="modal fade" id="cdSizeChartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Size Chart</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img src="assets/images/size-chart.png" alt="Size Chart" class="img-fluid" />
+        </div>
+      </div>
+    </div>
+  </div>`;
+  const sizeChartWrapper = document.createElement('div');
+  sizeChartWrapper.innerHTML = sizeChartModalHtml;
+  document.body.appendChild(sizeChartWrapper);
+  function showSizeChartModal(){ const el = document.getElementById('cdSizeChartModal'); if(el) new bootstrap.Modal(el).show(); }
+  // Expose for inline links on index.html info card
+  window.showSizeChartModal = showSizeChartModal;
+
   const cdCartItems = document.getElementById("cdCartItems");
   const cdCartTotal = document.getElementById("cdCartTotal");
   const cdClearCart = document.getElementById("cdClearCart");
@@ -162,9 +184,16 @@
   }
 
   // Product Card: minimal viewer (first image), name, price, size selector, actions
+  // Product Card: minimal viewer (first image), name, price (supports offer price), size selector, actions
   function makeCardHTML(p) {
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
+
+    // Price display: show strike-through original + red offer if offer_price is present
+    const hasOffer = !!(p.offer_price && String(p.offer_price).trim() !== '' && Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) > 0);
+    const priceBlock = hasOffer
+      ? `<div class="price"><span class="price-original text-muted text-decoration-line-through me-2">${formatPrice(p.price)}</span><span class="price-offer text-danger fw-semibold">${formatPrice(p.offer_price)}</span></div>`
+      : `<div class="price price-text-style">${formatPrice(p.price)}</div>`;
 
     let mediaHtml = '';
     if (!imgSrcs || imgSrcs.length === 0) {
@@ -188,8 +217,11 @@
           </div>
           <p class="card-text text-muted small mb-2">${escapeHtml((p.description || '').slice(0,120))}</p>
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="price price-text-style">${formatPrice(p.price)}</div>
-            <div class="text-muted small">${sizes.length ? 'Sizes' : ''}</div>
+            ${priceBlock}
+            <div class="text-muted small">
+              ${sizes.length ? '<a href="#" class="size-chart-link">Size Chart</a> · ' : ''}
+              ${sizes.length ? 'Sizes' : ''}
+            </div>
           </div>
 
           <div class="mt-auto">
@@ -261,6 +293,7 @@
   }
 
   // Render Categories: builds nav pills, mobile dropdown, and product grids
+  // Render Categories: builds in-page nav pills (now visible on mobile too), mobile navbar dropdown, and product grids
   function renderCategories(productsMap) {
     dynamicCatalogRoot.innerHTML = '';
     const catMap = buildCategoryMapWithMeta(productsMap);
@@ -281,7 +314,12 @@
         const wrapper = document.createElement('div');
         wrapper.innerHTML = `
           <div class="row g-2 align-items-center">
-            <div class="col-12 d-none d-md-block">
+            <!-- Heading shown above category buttons (desktop + mobile) -->
+            <div class="col-12">
+              <h6 class="shop-by-category fst-italic text-muted mb-1">SHOP BY CATEGORY</h6>
+            </div>
+            <!-- Category buttons: visible on both mobile and desktop -->
+            <div class="col-12">
               <ul class="nav nav-pills flex-nowrap overflow-auto" id="cd-category-pills" style="gap:.5rem; white-space:nowrap;"></ul>
             </div>
           </div>
@@ -348,7 +386,8 @@
       const section = document.createElement('section');
       section.className = 'category-section container mt-5';
       section.innerHTML = `
-        <h2 class="mb-3">${escapeHtml(catName)}</h2>
+        <!-- Category title: styled box for visibility (desktop + mobile) -->
+        <h2 class="category-title">${escapeHtml(catName)}</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4" id="cat-${escapeHtml(catName)}"></div>
       `;
       dynamicCatalogRoot.appendChild(section);
@@ -453,6 +492,11 @@
         openGalleryOverlay(imgs);
       });
     });
+
+    // Size chart link click -> open the size chart modal (desktop + mobile)
+    dynamicCatalogRoot.querySelectorAll('.size-chart-link').forEach(link => {
+      link.addEventListener('click', (e) => { e.preventDefault(); showSizeChartModal(); });
+    });
   }
 
   // Cart functions: load/save, UI updates, add/remove, checkout
@@ -529,15 +573,18 @@
   }
 
   // Add to Cart: adds item, merges by id+size, optionally opens modal
+  // Add to Cart: use offer price when available; else use base price
   function addToCart(id, size, openModal) {
     const p = PRODUCTS[id];
     if(!p) { console.warn('Product not found:', id); return; }
-    const priceNum = Number(String(p.price).replace(/[^0-9.-]+/g,'')) || 0;
+    const basePriceNum = Number(String(p.price).replace(/[^0-9.-]+/g,'')) || 0;
+    const offerPriceNum = Number(String(p.offer_price || '').replace(/[^0-9.-]+/g,'')) || 0;
+    const effectivePrice = offerPriceNum > 0 ? offerPriceNum : basePriceNum;
     const imgs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const image = imgs.length ? imgs[0] : 'assets/images/logo.png';
     const existing = cart.find(it => it.id === id && (it.size || '') === (size || ''));
     if(existing) existing.qty += 1;
-    else cart.push({ id, name: p.name, price: priceNum, qty: 1, size: size || null, image });
+    else cart.push({ id, name: p.name, price: effectivePrice, qty: 1, size: size || null, image });
     saveCart();
     if(openModal) {
       const modalEl = document.getElementById('cdStoreCartModal');
@@ -580,6 +627,7 @@
   cdCheckoutBtn.addEventListener('click', checkoutViaWhatsApp);
 
   // CSV -> PRODUCTS map: normalizes fields and builds category/product metadata
+  // CSV -> PRODUCTS map: normalizes fields and builds category/product metadata (includes offer_price)
   function parseCsv(results) {
     // parsed
     const rows = results.data || [];
@@ -588,6 +636,7 @@
       const id = (row.id || row.ID || row.Id || '').toString().trim() || String(idx+1);
       const name = (row.name || row.Name || row.product || '').toString().trim();
       const price = (row.price || row.Price || '0').toString().trim();
+      const offer_price = (row.offer_price || row.offerPrice || row["offer price"] || '').toString().trim();
       const sizes = (row.sizes || row.size || '').toString().trim();
       const image_ids = (row.image_ids || row.image_id || row.image || row.images || row.ImageIDs || row["image id"] || row["image-id"] || '').toString().trim();
       const category = (row.category || row.Category || '').toString().trim() || 'Uncategorized';
@@ -604,7 +653,7 @@
       const category_rank = Number(categoryRankRaw) || 0;
 
       PRODUCTS[id] = {
-        id, name, price, sizes,
+        id, name, price, offer_price, sizes,
         image_ids, category, description,
         priority, priority_rank,
         category_priority, category_rank

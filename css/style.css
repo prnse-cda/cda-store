@@ -105,6 +105,14 @@ html, body { height: 100%; }
 }
 .navbar-brand-text { font-size: 1.4rem; font-weight: bold; margin-left: 50px; color: #D4AF37; line-height: 1; font-family: 'Cormorant Garamond', serif; }
 
+/* Navbar solid state: improves contrast after scrolling or when mobile menu is open */
+.fixed-navbar.navbar-solid {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(120%) blur(6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
 /* Center brand text across desktop and mobile */
 .navbar .container { position: relative; }
 .navbar .navbar-brand {
@@ -312,7 +320,29 @@ html, body { height: 100%; }
 /* Category spacing: compact spacing and separators */
 #products.mt-5.pt-5 { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
 .category-section.container.mt-5 { margin-top: 0.5rem !important; padding-top: 0.25rem !important; border-top: 1px solid rgba(0,0,0,0.04); }
-.category-section h2 { margin-top: 0.25rem; margin-bottom: 0.4rem; line-height: 1.15; }
+
+/* In-page category nav: heading and pills visible on mobile + desktop */
+.shop-by-category { font-weight: 600; }
+#cd-category-pills { padding-bottom: 4px; }
+#cd-category-pills .nav-link { font-weight: 600; }
+
+/* Category title: prominent boxed style for better visibility on main page */
+.category-title {
+  display: block;
+  margin: 0.5rem 0 0.75rem;
+  padding: 10px 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+  background: rgba(0,0,0,0.035);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+@media (max-width: 576px) {
+  .category-title { font-size: 1.15rem; padding: 8px 10px; }
+}
 
 /* fallback scale for devices where JS won't run */
 @media (hover: hover) and (pointer: fine) {
