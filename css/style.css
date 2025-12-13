@@ -31,6 +31,29 @@
 }
 
 /* (merged below) fixed navbar styles are defined once under NAVBAR section */
+/* Theme: Velasca-inspired palette applied via CSS variables */
+:root {
+  /* Core palette */
+  --color-primary: #285570;      /* deep cool blue */
+  --color-bg: #faf7f6;           /* soft off-white */
+  --color-accent: #e3ded7;       /* warm light beige */
+  --color-muted: #cbcac7;        /* neutral gray-beige */
+  --color-dark: #333333;         /* near black */
+
+  /* Component tokens */
+  --nav-bg-solid: rgba(255,255,255,0.92);
+  --nav-text: var(--color-dark);
+  --brand-gold: #D4AF37; /* keep brand accent unless changed */
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-text: #ffffff;
+  --footer-bg: var(--color-accent);
+  --category-box-bg: rgba(0,0,0,0.035);
+  --category-box-border: rgba(0,0,0,0.06);
+}
+
+/* Apply base background, text, and font family (Lato site-wide) */
+html, body { background-color: var(--color-bg); color: var(--color-dark); font-family: 'Lato', Arial, sans-serif; }
+
 /* Product media: mobile-first scaling improvements for portrait images */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,8 +66,8 @@ html, body { height: 100%; }
 .penguin-card-border, .penguin-card-img { border-radius: 1em; }
 .price-text-style { color: rgb(237, 158, 12); font-weight: bold; }
 .penguin-card-footer, .penguin-card-border { background-color: white; border: 0; }
-.penguin-btn { background-color: hsl(124, 88%, 29%); color: white; }
-.footer-section { background-color: hsla(218, 55%, 71%, 0.621); padding: 3% 1% 1% 1%; }
+.penguin-btn { background-color: var(--btn-primary-bg); color: var(--btn-primary-text); }
+.footer-section { background-color: var(--footer-bg); padding: 3% 1% 1% 1%; }
 
 /* IMAGE / CAROUSEL: desktop width-first, mobile height-first scaling */
 :root {
@@ -101,13 +124,14 @@ html, body { height: 100%; }
 /* NAVBAR: positioning and mobile panel styles */
 .fixed-navbar {
   position: fixed; top: 0; width: 100%; z-index: 999;
-  background: hsla(0, 0%, 100%, 0.018); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.372); height: 80px;
+  background: hsla(0, 0%, 100%, 0.018); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); height: 80px;
 }
-.navbar-brand-text { font-size: 1.4rem; font-weight: bold; margin-left: 50px; color: #D4AF37; line-height: 1; font-family: 'Cormorant Garamond', serif; }
+/* Brand title color aligned to theme primary; change to --brand-gold if preferred */
+.navbar-brand-text { font-size: 1.4rem; font-weight: bold; margin-left: 50px; color: var(--color-primary); line-height: 1; }
 
 /* Navbar solid state: improves contrast after scrolling or when mobile menu is open */
 .fixed-navbar.navbar-solid {
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--nav-bg-solid);
   backdrop-filter: saturate(120%) blur(6px);
   box-shadow: 0 4px 14px rgba(0,0,0,0.08);
   border-bottom: 1px solid rgba(0,0,0,0.06);
@@ -116,11 +140,18 @@ html, body { height: 100%; }
 /* Center brand text across desktop and mobile */
 .navbar .container { position: relative; }
 .navbar .navbar-brand {
+  /* Center brand horizontally and stack title + tagline */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   margin-left: 0; /* override any spacing */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+/* Tagline: small, bold-ish, tight spacing and centered */
+.navbar-brand-subtext { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px; margin-top: 2px; }
 
 /* Place toggler (three lines) on the left for mobile */
 @media (max-width: 992px) {
@@ -314,8 +345,8 @@ html, body { height: 100%; }
   .hero-subtitle { font-size: 1.05rem; line-height: 1.25; }
   .hero-banners-track { animation-duration: 40s; }
 }
-.hero-title { color: #f5a419; font-size: 3.5rem; font-weight: bold; margin-bottom: 15px; }
-.hero-subtitle { color: #FFFFFF; font-size: 2rem; font-weight: bold; font-family: 'Playfair Display', serif; }
+.hero-title { color: var(--brand-gold); font-size: 3.5rem; font-weight: bold; margin-bottom: 15px; }
+.hero-subtitle { color: var(--color-bg); font-size: 2rem; font-weight: 700; }
 
 /* Category spacing: compact spacing and separators */
 #products.mt-5.pt-5 { margin-top: 0.5rem !important; padding-top: 0.5rem !important; }
@@ -333,9 +364,9 @@ html, body { height: 100%; }
   padding: 10px 12px;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #333;
-  background: rgba(0,0,0,0.035);
-  border: 1px solid rgba(0,0,0,0.06);
+  color: var(--color-dark);
+  background: var(--category-box-bg);
+  border: 1px solid var(--category-box-border);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
