@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Twinkle+Star&display=swap" rel="stylesheet">
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -30,7 +31,7 @@
       <div class="container">
         <!-- Brand: title + small red tagline centered below -->
         <a class="navbar-brand" href="#">
-          <span class="navbar-brand-text">CATHY'S DREAMY ATTIRE</span>
+          <span class="navbar-brand-text">Cathy's Dreamy Attire</span>
           <span class="navbar-brand-subtext text-danger">Stay Cool . Stay You</span>
         </a>
 
@@ -154,7 +155,7 @@
               <img src="assets/images/logo.png" alt="" class="penguin-logo img-fluid" />
               <hr />
               <p>
-                At <strong>Cathy's Dreamy Attire</strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
+                At <strong>Cathy’s Dreamy Attire™</strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
                 We specialize in custom designing, personalized outfit customization, and offer a handpicked collection through our exclusive online boutique.
               </p>
             </div>
@@ -195,14 +196,12 @@
           <footer>
             <hr />
             <p class="text-center">
-              © <span id="yearHome"></span> Cathy’s Dreamy Attire® • All Rights Reserved
+              © <span id="yearHome"></span> • Cathy’s Dreamy Attire™ • All Rights Reserved
             </p>
           </footer>
 
           <!-- Inline Script: sets current year in footer -->
-          <script>
-            document.getElementById("yearHome").textContent = new Date().getFullYear();
-          </script>
+          <!-- Year handled by js/site.js -->
 
         </div>
       </section>
@@ -212,6 +211,7 @@
     <!-- Core Scripts: Bootstrap, store logic, image zoom (deferred) -->
     <script src="js/bootstrap.min.js"></script>
     <script src="js/store.js"></script>
+    <script src="js/site.js"></script>
     <script src="js/zoom.js" defer></script>
 
     <!-- Navbar behavior: centralized in js/nav.js (auto-close + solid background) -->

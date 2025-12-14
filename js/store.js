@@ -183,6 +183,7 @@
   function makeCardHTML(p) {
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
+    const isFinalSale = (p.category || '').toString().trim().toLowerCase() === 'final sale';
 
     // Price display: show strike-through original + red offer if offer_price is present
     const hasOffer = !!(p.offer_price && String(p.offer_price).trim() !== '' && Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) > 0);
@@ -207,7 +208,10 @@
         ${mediaHtml}
         <div class="card-body d-flex flex-column">
           <div class="d-flex justify-content-between align-items-start mb-2">
-            <h5 class="card-title mb-0">${escapeHtml(p.name)}</h5>
+            <div class="d-flex align-items-center gap-2">
+              <h5 class="card-title mb-0">${escapeHtml(p.name)}</h5>
+              ${isFinalSale ? '<span class="badge badge-only-one">Only 1 Left</span>' : ''}
+            </div>
             <div class="d-flex align-items-center gap-2">
               <small class="text-muted">${escapeHtml(p.category || '')}</small>
               <button class="btn btn-sm btn-outline-secondary btn-share" title="Share link" data-id="${escapeHtml(p.id)}"><i class="fa fa-share-alt"></i></button>
@@ -221,6 +225,7 @@
               ${sizes.length ? 'Sizes' : ''}
             </div>
           </div>
+          ${isFinalSale ? '<div class="text-danger small mb-2">Final Sale: No Exchanges</div>' : ''}
 
           <div class="mt-auto">
             <div class="mb-2">${sizeSelectHtml}</div>

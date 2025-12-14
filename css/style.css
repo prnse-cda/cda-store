@@ -59,7 +59,7 @@ html, body { background-color: var(--color-bg); color: var(--color-dark); font-f
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
-.penguin-logo { width: 200px; }
+.penguin-logo { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 
 /* Price / info / buttons */
 .penguin-info { display: block; margin-left: auto; margin-right: auto; margin-top: 10%; }
@@ -127,7 +127,16 @@ html, body { height: 100%; }
   background: hsla(0, 0%, 100%, 0.018); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); height: 80px;
 }
 /* Brand title color aligned to theme primary; change to --brand-gold if preferred */
-.navbar-brand-text { font-size: 1.4rem; font-weight: bold; margin-left: 50px; color: var(--color-primary); line-height: 1; }
+.navbar-brand-text {
+  font-size: 2.3rem;
+  font-family: "Cookie", cursive;
+  font-weight: 400; /* stronger presence to echo logo */
+  font-style: normal;
+  margin-left: 50px;
+  color: var(--brand-gold); /* match logo accent */
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
 
 /* Navbar solid state: improves contrast after scrolling or when mobile menu is open */
 .fixed-navbar.navbar-solid {
@@ -625,3 +634,14 @@ html, body { height: 100%; }
 }
 .back-home-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
 .back-home-btn:active { filter: brightness(0.98); }
+
+/* Only 1 Left badge (Final Sale) */
+.badge-only-one {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dc3545; /* Bootstrap danger tone */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
