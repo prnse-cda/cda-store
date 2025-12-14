@@ -1,15 +1,11 @@
 // js/store.js
-// Main product rendering + cart logic.
-// Kept behavior intact; removed prev/next arrow buttons from small in-card carousels
-// to avoid tall overlay controls in the product grid.
-
-// store.js
-// Responsibilities:
-// - Fetch products CSV via PapaParse
-// - Build category navigation and product cards
-// - Lazy-load images and open gallery overlays
+// Purpose: Catalog rendering + cart logic for the homepage.
+// Overview:
+// - Fetch products from Google Sheets CSV (PapaParse)
+// - Build category navigation and product cards (with share URL)
+// - Lazy-load images; open gallery overlay; size chart modal
 // - Manage cart UI/state and WhatsApp checkout
-// - Provide a back-to-top button
+// - Back-to-top utility button
 
 (() => {
   // Bootstrap + runtime guards and setup
@@ -135,7 +131,7 @@
   let PRODUCTS = {};
   let cart = [];
 
-  // Image helpers
+  // Image helpers: normalize Google Drive links and build thumbnails
   function looksLikeUrl(s) { return /^https?:\/\//i.test((s||'').trim()); }
   function extractDriveId(token) {
     if (!token) return null;
@@ -183,8 +179,7 @@
     return `${prefix}-${cleaned}-${Math.random().toString(36).slice(2,8)}`;
   }
 
-  // Product Card: minimal viewer (first image), name, price, size selector, actions
-  // Product Card: minimal viewer (first image), name, price (supports offer price), size selector, actions
+  // Product Card UI: first image, name, price (supports offer price), size selector, actions, share
   function makeCardHTML(p) {
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
@@ -213,7 +208,10 @@
         <div class="card-body d-flex flex-column">
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title mb-0">${escapeHtml(p.name)}</h5>
-            <small class="text-muted">${escapeHtml(p.category || '')}</small>
+            <div class="d-flex align-items-center gap-2">
+              <small class="text-muted">${escapeHtml(p.category || '')}</small>
+              <button class="btn btn-sm btn-outline-secondary btn-share" title="Share link" data-id="${escapeHtml(p.id)}"><i class="fa fa-share-alt"></i></button>
+            </div>
           </div>
           <p class="card-text text-muted small mb-2">${escapeHtml((p.description || '').slice(0,120))}</p>
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -292,8 +290,7 @@
     return [...prioritized, ...withPriorityProducts, ...rest];
   }
 
-  // Render Categories: builds nav pills, mobile dropdown, and product grids
-  // Render Categories: builds in-page nav pills (now visible on mobile too), mobile navbar dropdown, and product grids
+  // Render Categories: builds nav pills (mobile+desktop), mobile dropdown, and product grids
   function renderCategories(productsMap) {
     dynamicCatalogRoot.innerHTML = '';
     const catMap = buildCategoryMapWithMeta(productsMap);
@@ -404,7 +401,7 @@
       });
     });
 
-    // Initialize carousels (single explicit init per element)
+    // Initialize any Bootstrap carousels (if present)
     dynamicCatalogRoot.querySelectorAll('.carousel').forEach(car => {
       try {
         if (bootstrap.Carousel.getInstance(car)) {
@@ -420,8 +417,8 @@
       }
     });
 
-    // attach handlers
-        // Lazy-load product images with limited concurrency to mitigate Drive 429
+    // Attach handlers
+      // Lazy-load product images with limited concurrency to mitigate Drive 429
         try {
           const imgs = dynamicCatalogRoot.querySelectorAll('.product-media img');
           const queue = [];
@@ -477,6 +474,12 @@
       const sel = card.querySelector('.card-size');
       const selectedSize = sel ? sel.value : null;
       addToCart(id, selectedSize, true);
+    }));
+
+    // Share button: copy product-specific URL or use native share if available
+    dynamicCatalogRoot.querySelectorAll('.btn-share').forEach(b => b.addEventListener('click', e => {
+      const id = e.currentTarget.getAttribute('data-id');
+      shareProduct(id);
     }));
 
     // Product image click -> open gallery (desktop: thumbnail list + hover zoom; mobile: cascade -> fullscreen view)
@@ -572,8 +575,7 @@
     }
   }
 
-  // Add to Cart: adds item, merges by id+size, optionally opens modal
-  // Add to Cart: use offer price when available; else use base price
+  // Add to Cart: merge by id+size; use offer price when available
   function addToCart(id, size, openModal) {
     const p = PRODUCTS[id];
     if(!p) { console.warn('Product not found:', id); return; }
@@ -594,6 +596,22 @@
 
   function clearCart(){ if(!confirm('Clear your cart?')) return; cart = []; saveCart(); renderCartItems(); }
   function showCartModal(){ const modalEl = document.getElementById('cdStoreCartModal'); if(modalEl) new bootstrap.Modal(modalEl).show(); }
+
+  // Build and share a product-specific URL via query parameter
+  function shareProduct(id){
+    if (!id) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set('product', id);
+    const href = url.toString();
+    if (navigator.share) {
+      const p = PRODUCTS[id];
+      navigator.share({ title: (p && p.name) || 'Product', text: 'Check out this product', url: href }).catch(()=>{
+        try { navigator.clipboard && navigator.clipboard.writeText(href); alert('Link copied to clipboard'); } catch(_) { alert(href); }
+      });
+    } else {
+      try { navigator.clipboard && navigator.clipboard.writeText(href); alert('Link copied to clipboard'); } catch(_) { alert(href); }
+    }
+  }
 
   // Checkout: opens WhatsApp with prefilled order + customer details
   function checkoutViaWhatsApp() {
@@ -626,8 +644,7 @@
   cdClearCart.addEventListener('click', clearCart);
   cdCheckoutBtn.addEventListener('click', checkoutViaWhatsApp);
 
-  // CSV -> PRODUCTS map: normalizes fields and builds category/product metadata
-  // CSV -> PRODUCTS map: normalizes fields and builds category/product metadata (includes offer_price)
+  // CSV -> PRODUCTS map: normalize fields and build category/product metadata (includes offer_price)
   function parseCsv(results) {
     // parsed
     const rows = results.data || [];
@@ -664,6 +681,20 @@
     loadCart();
     renderCartItems();
     if (window.cdZoomAttachAll) window.cdZoomAttachAll();
+
+    // If a product param is present, scroll to and highlight that product
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const pid = params.get('product');
+      if (pid && PRODUCTS[pid]) {
+        const el = document.querySelector(`.card-product[data-pid="${CSS.escape(pid)}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          el.classList.add('share-highlight');
+          setTimeout(() => el.classList.remove('share-highlight'), 3000);
+        }
+      }
+    } catch (_) { /* ignore */ }
   }
 
   // Fetch CSV from Google Sheets via PapaParse

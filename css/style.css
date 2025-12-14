@@ -30,7 +30,7 @@
   }
 }
 
-/* (merged below) fixed navbar styles are defined once under NAVBAR section */
+/* Fixed navbar styles and theme variables */
 /* Theme: Velasca-inspired palette applied via CSS variables */
 :root {
   /* Core palette */
@@ -54,7 +54,7 @@
 /* Apply base background, text, and font family (Lato site-wide) */
 html, body { background-color: var(--color-bg); color: var(--color-dark); font-family: 'Lato', Arial, sans-serif; }
 
-/* Product media: mobile-first scaling improvements for portrait images */
+/* Product media: scaling improvements for portrait images */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -357,6 +357,26 @@ html, body { height: 100%; }
 #cd-category-pills { padding-bottom: 4px; }
 #cd-category-pills .nav-link { font-weight: 600; }
 
+/* Modern style for category pills */
+#cd-category-pills .nav-link.btn {
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: linear-gradient(180deg, #ffffff, #f6f6f6);
+  color: var(--color-dark);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  padding: 8px 14px;
+}
+#cd-category-pills .nav-link.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+#cd-category-pills .nav-link.btn:active,
+#cd-category-pills .nav-link.btn.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
 /* Category title: prominent boxed style for better visibility on main page */
 .category-title {
   display: block;
@@ -578,3 +598,30 @@ html, body { height: 100%; }
 }
 .cd-gallery-mobile-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; opacity: 0.85; }
 .cd-gallery-mobile-thumbs img.active { outline: 2px solid #fff; opacity: 1; }
+
+/* Share highlight effect when navigating via ?product=ID */
+.card-product.share-highlight {
+  outline: 2px solid var(--brand-gold);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  animation: cd-highlight-pulse 1.6s ease-in-out 2;
+}
+@keyframes cd-highlight-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}
+
+/* Back-to-Home modern button (policies) */
+.back-home-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), #1f4358);
+  box-shadow: 0 8px 20px rgba(31, 67, 88, 0.22);
+}
+.back-home-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.back-home-btn:active { filter: brightness(0.98); }
