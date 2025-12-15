@@ -54,14 +54,16 @@
         </div>
         <div class="modal-body">
           <div id="cdCartItems" class="list-group mb-3"></div>
-          <div class="d-flex justify-content-between align-items-center mb-3">
+          <div id="cdTotalRow" class="d-flex justify-content-between align-items-center mb-3">
             <div><strong>Total:</strong></div>
             <div><h5 id="cdCartTotal" class="mb-0">₹0.00</h5></div>
           </div>
-          <hr />
-          <h6>Shipping & Customer Details</h6>
-          <p class="small text-muted mb-0">Please fill in all required fields marked with <strong>*</strong>.</p>
-          <p class="small text-muted">BUY will open WhatsApp and pre-fill your order details for you to review and send to us.</p>
+          <hr id="cdCartDivider" />
+          <h6 id="cdShippingHeading">Shipping & Customer Details</h6>
+          <div id="cdShippingNotes">
+            <p class="small text-muted mb-0">Please fill in all required fields marked with <strong>*</strong>.</p>
+            <p class="small text-muted">BUY will open WhatsApp and pre-fill your order details for you to review and send to us.</p>
+          </div>
           <form id="cdCheckoutForm" class="row g-2">
             <div class="col-md-6">
               <label class="form-label">Full name*</label>
@@ -77,13 +79,14 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Pincode*</label>
-              <input id="cdPincode" class="form-control" required />
+              <input id="cdPincode" class="form-control" required inputmode="numeric" maxlength="6" pattern="^[1-9][0-9]{5}$" placeholder="6-digit PIN code" />
+              <div id="cdPincodeFeedback" class="invalid-feedback">Enter a valid 6-digit PIN code.</div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button id="cdClearCart" class="btn btn-outline-danger me-auto">Clear Cart</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+          <button id="cdContinueBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
           <button id="cdCheckoutBtn" type="button" class="btn btn-success"><i class="fa fa-whatsapp ms-2" aria-hidden="true"></i> BUY</button>
         </div>
       </div>
@@ -126,6 +129,29 @@
   const cdCity = document.getElementById("cdCity");
   const cdPincode = document.getElementById("cdPincode");
   const cartCountBadge = document.getElementById("cartCountBadge");
+  const cdTotalRow = document.getElementById('cdTotalRow');
+  const cdCartDivider = document.getElementById('cdCartDivider');
+  const cdCheckoutFormEl = document.getElementById('cdCheckoutForm');
+  const cdShippingHeading = document.getElementById('cdShippingHeading');
+  const cdShippingNotes = document.getElementById('cdShippingNotes');
+  const cdContinueBtn = document.getElementById('cdContinueBtn');
+
+  // Basic India PIN code validation helpers
+  function isValidIndianPincode(pin){
+    return /^[1-9][0-9]{5}$/.test(String(pin||'').trim());
+  }
+  try {
+    if (cdPincode) {
+      cdPincode.addEventListener('input', function(){
+        // Keep only digits, limit to 6
+        this.value = this.value.replace(/[^0-9]/g,'').slice(0,6);
+        if (isValidIndianPincode(this.value)) this.classList.remove('is-invalid');
+      });
+      cdPincode.addEventListener('blur', function(){
+        this.classList.toggle('is-invalid', !isValidIndianPincode(this.value));
+      });
+    }
+  } catch(_) {}
 
   // In-memory state
   let PRODUCTS = {};
@@ -184,6 +210,7 @@
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
     const isFinalSale = (p.category || '').toString().trim().toLowerCase() === 'final sale';
+    const onlyOneText = sizes.length > 1 ? 'Only 1 Left per Size' : 'Only 1 Left';
 
     // Price display: show strike-through original + red offer if offer_price is present
     const hasOffer = !!(p.offer_price && String(p.offer_price).trim() !== '' && Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) > 0);
@@ -200,7 +227,7 @@
     }
 
     const sizeSelectHtml = sizes.length
-      ? `<select class="form-select form-select-sm card-size" data-id="${escapeHtml(p.id)}">${sizes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('')}</select>`
+      ? `<div class="cd-size-pills" role="group" aria-label="Choose size" data-id="${escapeHtml(p.id)}">${sizes.map((s, i) => `<button type="button" class="cd-size-pill ${i===0 ? 'selected' : ''}" data-size="${escapeHtml(s)}" aria-pressed="${i===0 ? 'true' : 'false'}">${escapeHtml(s)}</button>`).join('')}</div>`
       : `<div class="small text-muted">One size</div>`;
 
     return `
@@ -210,7 +237,7 @@
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div class="d-flex align-items-center gap-2">
               <h5 class="card-title mb-0">${escapeHtml(p.name)}</h5>
-              ${isFinalSale ? '<span class="badge badge-only-one">Only 1 Left</span>' : ''}
+              ${isFinalSale ? `<span class="badge badge-only-one">${escapeHtml(onlyOneText)}</span>` : ''}
             </div>
             <div class="d-flex align-items-center gap-2">
               <small class="text-muted">${escapeHtml(p.category || '')}</small>
@@ -495,15 +522,25 @@
     dynamicCatalogRoot.querySelectorAll('.btn-add').forEach(b => b.addEventListener('click', e => {
       const id = e.currentTarget.getAttribute('data-id');
       const card = e.currentTarget.closest('.card');
-      const sel = card.querySelector('.card-size');
-      const selectedSize = sel ? sel.value : null;
+      let selectedSize = null;
+      const pill = card.querySelector('.cd-size-pill.selected');
+      if (pill) selectedSize = pill.getAttribute('data-size');
+      else {
+        const sel = card.querySelector('.card-size');
+        if (sel) selectedSize = sel.value;
+      }
       addToCart(id, selectedSize, false);
     }));
     dynamicCatalogRoot.querySelectorAll('.btn-buy').forEach(b => b.addEventListener('click', e => {
       const id = e.currentTarget.getAttribute('data-id');
       const card = e.currentTarget.closest('.card');
-      const sel = card.querySelector('.card-size');
-      const selectedSize = sel ? sel.value : null;
+      let selectedSize = null;
+      const pill = card.querySelector('.cd-size-pill.selected');
+      if (pill) selectedSize = pill.getAttribute('data-size');
+      else {
+        const sel = card.querySelector('.card-size');
+        if (sel) selectedSize = sel.value;
+      }
       addToCart(id, selectedSize, true);
     }));
 
@@ -540,6 +577,17 @@
     dynamicCatalogRoot.querySelectorAll('.size-chart-link').forEach(link => {
       link.addEventListener('click', (e) => { e.preventDefault(); showSizeChartModal(); });
     });
+
+    // Size pills selection (toggle selected appearance and aria state)
+    dynamicCatalogRoot.querySelectorAll('.cd-size-pills').forEach(group => {
+      group.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.cd-size-pill');
+        if (!btn) return;
+        group.querySelectorAll('.cd-size-pill').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed','false'); });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed','true');
+      });
+    });
   }
 
   // Cart functions: load/save, UI updates, add/remove, checkout
@@ -552,6 +600,17 @@
     if(!cart.length){
       cdCartItems.innerHTML = `<div class="text-center text-muted py-4">Your cart is empty</div>`;
       cdCartTotal.textContent = formatPrice(0);
+      // Hide totals and checkout form when empty; disable actions
+      if (cdTotalRow) cdTotalRow.style.display = 'none';
+      if (cdCartDivider) cdCartDivider.style.display = 'none';
+      if (cdCheckoutFormEl) cdCheckoutFormEl.style.display = 'none';
+      if (cdShippingHeading) cdShippingHeading.style.display = 'none';
+      if (cdShippingNotes) cdShippingNotes.style.display = 'none';
+      if (cdClearCart) cdClearCart.style.display = 'none';
+      if (cdCheckoutBtn) cdCheckoutBtn.style.display = 'none';
+      if (cdContinueBtn) cdContinueBtn.style.display = '';
+      if (cdCheckoutBtn) cdCheckoutBtn.disabled = true;
+      if (cdClearCart) cdClearCart.disabled = true;
       return;
     }
     cart.forEach((it, idx) => {
@@ -613,6 +672,17 @@
       cartCountBadge.textContent = cart.reduce((s,i) => s + i.qty, 0);
       cartCountBadge.style.display = cart.length ? 'inline-block' : 'none';
     }
+    // Show totals and checkout when items exist; enable actions
+    if (cdTotalRow) cdTotalRow.style.display = '';
+    if (cdCartDivider) cdCartDivider.style.display = '';
+    if (cdCheckoutFormEl) cdCheckoutFormEl.style.display = '';
+    if (cdShippingHeading) cdShippingHeading.style.display = '';
+    if (cdShippingNotes) cdShippingNotes.style.display = '';
+    if (cdClearCart) cdClearCart.style.display = '';
+    if (cdCheckoutBtn) cdCheckoutBtn.style.display = '';
+    if (cdContinueBtn) cdContinueBtn.style.display = '';
+    if (cdCheckoutBtn) cdCheckoutBtn.disabled = false;
+    if (cdClearCart) cdClearCart.disabled = false;
   }
 
   // Add to Cart: merge by id+size; use offer price when available
@@ -679,6 +749,11 @@
     if (!cdName.value.trim() || !cdAddress.value.trim() ||
         !cdCity.value.trim() || !cdPincode.value.trim()) {
       alert('Please fill customer details.');
+      return;
+    }
+    if (!isValidIndianPincode(cdPincode.value)) {
+      cdPincode.classList.add('is-invalid');
+      alert('Please enter a valid 6-digit PIN code.');
       return;
     }
 
