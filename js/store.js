@@ -210,7 +210,6 @@
     const imgSrcs = tokenToImageSrcs(p.image_ids || p.image || p.images || '');
     const sizes = (p.sizes || p.size || '').toString().split(',').map(s => s.trim()).filter(Boolean);
     const isFinalSale = (p.category || '').toString().trim().toLowerCase() === 'final sale';
-    const onlyOneText = sizes.length > 1 ? 'Only 1 Left per Size' : 'Only 1 Left';
 
     // Price display: show strike-through original + red offer if offer_price is present
     const hasOffer = !!(p.offer_price && String(p.offer_price).trim() !== '' && Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) > 0);
@@ -237,7 +236,7 @@
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div class="d-flex align-items-center gap-2">
               <h5 class="card-title mb-0">${escapeHtml(p.name)}</h5>
-              ${isFinalSale ? `<span class="badge badge-only-one">${escapeHtml(onlyOneText)}</span>` : ''}
+              ${isFinalSale ? '<span class="badge badge-only-one">Only 1 Left</span>' : ''}
             </div>
             <div class="d-flex align-items-center gap-2">
               <small class="text-muted">${escapeHtml(p.category || '')}</small>
@@ -372,8 +371,16 @@
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
-                const section = el.closest('.category-section');
-                (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const section = el.closest('.category-section') || el;
+                // Smooth scroll with fixed navbar offset
+                try {
+                  const fixedNav = document.querySelector('.fixed-navbar');
+                  const offset = (fixedNav ? fixedNav.offsetHeight : 0) + 10;
+                  const top = section.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - offset;
+                  window.scrollTo({ top, behavior: 'smooth' });
+                } catch(_) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }
             });
             li.appendChild(a);
@@ -397,8 +404,15 @@
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
-                const section = el.closest('.category-section');
-                (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const section = el.closest('.category-section') || el;
+                try {
+                  const fixedNav = document.querySelector('.fixed-navbar');
+                  const offset = (fixedNav ? fixedNav.offsetHeight : 0) + 10;
+                  const top = section.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - offset;
+                  window.scrollTo({ top, behavior: 'smooth' });
+                } catch(_) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }
               // Close dropdown and collapse on mobile
               try {

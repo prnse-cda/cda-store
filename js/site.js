@@ -57,4 +57,42 @@
       } catch(_) {}
     });
   } catch(_) {}
+
+  // Smooth scroll with fixed-navbar offset for top nav links
+  try {
+    var fixedNav = document.querySelector('.fixed-navbar');
+    var getOffset = function(){ return fixedNav ? fixedNav.offsetHeight + 10 : 0; };
+    var scrollToEl = function(el){
+      if (!el) return;
+      var top = el.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - getOffset();
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    };
+    document.addEventListener('click', function(ev){
+      var link = ev.target && ev.target.closest ? ev.target.closest('a.nav-link[href]') : null;
+      if (!link) return;
+      var href = link.getAttribute('href');
+      if (!href) return;
+      if (href === '#products') {
+        ev.preventDefault();
+        var el = document.getElementById('cd-collections-nav') || document.getElementById('products');
+        scrollToEl(el);
+      } else if (href === '#about-us') {
+        ev.preventDefault();
+        var el = document.querySelector('.footer-section');
+        scrollToEl(el);
+      } else if (href === '#') {
+        // HOME: scroll to top
+        ev.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      // Close mobile nav if open
+      try {
+        var collapseEl = document.getElementById('navbarNav');
+        if (collapseEl && typeof bootstrap !== 'undefined') {
+          var bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+          bsCollapse.hide();
+        }
+      } catch(_) {}
+    });
+  } catch(_) {}
 })();
