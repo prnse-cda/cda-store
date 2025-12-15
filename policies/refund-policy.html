@@ -6,13 +6,22 @@
   <title>Refund Policy • Cathy's Dreamy Attire</title>
   <link rel="stylesheet" href="../css/bootstrap.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  />
+  <!-- Lato font for consistent typography across pages -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Twinkle+Star&display=swap" rel="stylesheet">
 </head>
 <body>
   <!-- FIXED NAVBAR (same as home) -->
   <nav class="navbar navbar-expand-lg navbar-light fixed-navbar">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="../index.html">
-        <span class="navbar-brand-text">CATHY'S DREAMY ATTIRE</span>
+        <span class="navbar-brand-text">Cathy's Dreamy Attire</span>
       </a>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -32,7 +41,7 @@
   <main>
   <div class="container py-4" style="margin-top: 96px;">
     <h1 class="mb-3">Return & Refund Policy</h1>
-    <p class="text-muted">Effective date: <span id="year"></span></p>
+    <p class="text-muted">Effective date: <span id="year"></span> • Cathy’s Dreamy Attire™</p>
 
     <p>We use handwoven material for our products; therefore, it may have some irregularities in weaves and can't be considered a defect.</p>
     <p>We can't give any guarantees on colour fastness. Natural dyes like indigo will bleed during the first wash and we cannot offer any returns/exchanges in such cases.</p>
@@ -41,12 +50,13 @@
     <p>If You have received the wrong product i.e., the colour, size, or a defective/damaged product, we can replace it but it may be subject to the following conditions.</p>
     <h5>Eligibility</h5>
     <p>
-      Exchanges and returns will be accepted only for eligible <strong>items with intact tags, in unused and undamaged condition, and accompanied by a valid opening video</strong>.
+      Exchanges and returns are accepted only for <strong>items with intact tags, original packaging, unused and undamaged condition</strong>, and <strong>accompanied by a valid opening video</strong>.
+      The opening video should be continuous (uncut), clearly show the outer package with shipping label, and the item’s condition at first opening.
     </p>
 
     <h5>Timeline</h5>
     <p>
-      Please contact us within <strong>3 days of delivery</strong> to initiate an exchange or return.
+      Please contact us within <strong>3 days of delivery</strong> to initiate an exchange or return, including <strong>your order number</strong> and <strong>unboxing/opening video</strong>.
     </p>
 
     <h5>Process</h5>
@@ -58,15 +68,33 @@
 
     <h5>Non-Returnable Items</h5>
     <ul>
-      <li>Customized or tailored items made specifically for you.</li>
-      <li>Items with removed tags or signs of use/damage.</li>
-      <li>Sale items if marked “End-of-Line Sale”.</li>
+        <li>Customized or tailored items made specifically for you.</li>
+        <li>Items with removed tags, missing original packaging, or signs of wear/damage (including perfume or makeup marks).</li>
+
+        <li>Items where colour bleed occurs due to natural dyes when care instructions were not followed.</li>
+    </ul>
+
+    <h5>Non-Exchangeable Items</h5>
+    <ul>
+      <li>Items marked <strong>Final Sale</strong> (only one piece left per size).</li>
+      <li>Discontinued or end-of-line items.</li>
+      <li>Items with limited stock where size swaps aren’t possible.</li>
     </ul>
 
     <h5>Refund Method</h5>
     <p>
-      Approved refunds are processed to your original payment method or as store credit, as applicable.
+        Approved refunds are processed to your original payment method or as store credit, as applicable. Refunds are typically processed within <strong>5–7 business days</strong> after successful quality check of the returned item.
     </p>
+
+      <h5>Return Shipping</h5>
+      <p>
+        For wrong or defective items confirmed by our team, <strong>return shipping is covered by us</strong>. For other cases (e.g., preference change), <strong>return shipping may be borne by the customer</strong>. We will provide instructions during the return initiation.
+      </p>
+
+      <h5>International Orders</h5>
+      <p>
+        International returns/exchanges may not be available or can incur higher shipping costs. Please contact us to check feasibility before initiating a return.
+      </p>
 
     <h5>Contact</h5>
     <p>
@@ -79,6 +107,13 @@
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+  <div class="container pb-5">
+    <a href="../index.html" class="back-home-btn" title="Back to Home">
+      <span class="fa fa-home"></span>
+      <span class="ms-2">Back to Home</span>
+    </a>
+  </div>
   <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/nav.js"></script>
 </body>
 </html>

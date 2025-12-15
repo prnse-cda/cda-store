@@ -6,13 +6,22 @@
   <title>Shipping Policy • Cathy's Dreamy Attire</title>
   <link rel="stylesheet" href="../css/bootstrap.min.css" />
   <link rel="stylesheet" href="../css/style.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  />
+  <!-- Lato font for consistent typography across pages -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Twinkle+Star&display=swap" rel="stylesheet">
 </head>
 <body class="policy-page">
   <!-- FIXED NAVBAR (same as home) -->
   <nav class="navbar navbar-expand-lg navbar-light fixed-navbar">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="../index.html">
-        <span class="navbar-brand-text">CATHY'S DREAMY ATTIRE</span>
+        <span class="navbar-brand-text">Cathy's Dreamy Attire</span>
       </a>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -32,7 +41,7 @@
   <main>
   <div class="container py-4" style="margin-top: 96px;">
     <h1 class="mb-3">Shipping Policy</h1>
-    <p class="text-muted">Effective date: <span id="year"></span></p>
+    <p class="text-muted">Effective date: <span id="year"></span> • Cathy’s Dreamy Attire™</p>
 
     <h5>Processing Time</h5>
     <p>
@@ -77,6 +86,13 @@ Custom or made-to-order items may take 7–14 business days, and we will notify 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+  <div class="container pb-5">
+    <a href="../index.html" class="back-home-btn" title="Back to Home">
+      <span class="fa fa-home"></span>
+      <span class="ms-2">Back to Home</span>
+    </a>
+  </div>
   <script src="../js/bootstrap.min.js"></script>
+  <script src="../js/nav.js"></script>
 </body>
 </html>
