@@ -892,6 +892,9 @@
     }
     const showThreshold = 300;
     function updateVisibility(){
+      // Hide entirely on mobile view
+      const w = window.innerWidth || document.documentElement.clientWidth || 0;
+      if (w <= 576) { btn.style.display = 'none'; return; }
       const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
       btn.style.display = y > showThreshold ? 'inline-flex' : 'none';
     }
