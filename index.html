@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WYB41RBFGS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);} 
+      gtag('js', new Date());
+      // Consent Mode v2: default deny until user accepts
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      });
+      gtag('config', 'G-WYB41RBFGS');
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Online Shopping: cdastore.in</title>
@@ -19,6 +34,8 @@
 
     <!-- PapaParse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <!-- Consent Banner -->
+    <script src="js/consent.js"></script>
   </head>
 
   <body>
@@ -170,11 +187,11 @@
             <div class="col-sm pe-5 pt-3">
               <h5>Get in Touch</h5>
               <hr />
-              <a href="https://www.facebook.com/CathysDreamyAttire/" target="_blank" rel="noopener noreferrer">
-                <i class="fa fa-facebook-square fa-2x pe-3"></i>
-              </a>
               <a href="https://www.instagram.com/cathys_dreamy_attire/" target="_blank" rel="noopener noreferrer">
                 <i class="fa fa-instagram fa-2x pe-3"></i>
+              </a>
+              <a href="https://www.facebook.com/CathysDreamyAttire/" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-facebook-square fa-2x pe-3"></i>
               </a>
               <a href="https://wa.me/917907555924?text=Hello%20Cathy%E2%80%99s%20Dreamy%20Attire" target="_blank" rel="noopener noreferrer">
                 <i class="fa fa-whatsapp fa-2x pe-3"></i>
@@ -212,6 +229,7 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/store.js"></script>
     <script src="js/site.js"></script>
+    <script src="js/whatsapp-float.js"></script>
     <script src="js/zoom.js" defer></script>
 
     <!-- Navbar behavior: centralized in js/nav.js (auto-close + solid background) -->

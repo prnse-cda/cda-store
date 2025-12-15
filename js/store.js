@@ -54,14 +54,16 @@
         </div>
         <div class="modal-body">
           <div id="cdCartItems" class="list-group mb-3"></div>
-          <div class="d-flex justify-content-between align-items-center mb-3">
+          <div id="cdTotalRow" class="d-flex justify-content-between align-items-center mb-3">
             <div><strong>Total:</strong></div>
             <div><h5 id="cdCartTotal" class="mb-0">₹0.00</h5></div>
           </div>
-          <hr />
-          <h6>Shipping & Customer Details</h6>
-          <p class="small text-muted mb-0">Please fill in all required fields marked with <strong>*</strong>.</p>
-          <p class="small text-muted">BUY will open WhatsApp and pre-fill your order details for you to review and send to us.</p>
+          <hr id="cdCartDivider" />
+          <h6 id="cdShippingHeading">Shipping & Customer Details</h6>
+          <div id="cdShippingNotes">
+            <p class="small text-muted mb-0">Please fill in all required fields marked with <strong>*</strong>.</p>
+            <p class="small text-muted">BUY will open WhatsApp and pre-fill your order details for you to review and send to us.</p>
+          </div>
           <form id="cdCheckoutForm" class="row g-2">
             <div class="col-md-6">
               <label class="form-label">Full name*</label>
@@ -77,13 +79,14 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Pincode*</label>
-              <input id="cdPincode" class="form-control" required />
+              <input id="cdPincode" class="form-control" required inputmode="numeric" maxlength="6" pattern="^[1-9][0-9]{5}$" placeholder="6-digit PIN code" />
+              <div id="cdPincodeFeedback" class="invalid-feedback">Enter a valid 6-digit PIN code.</div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button id="cdClearCart" class="btn btn-outline-danger me-auto">Clear Cart</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+          <button id="cdContinueBtn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
           <button id="cdCheckoutBtn" type="button" class="btn btn-success"><i class="fa fa-whatsapp ms-2" aria-hidden="true"></i> BUY</button>
         </div>
       </div>
@@ -126,6 +129,29 @@
   const cdCity = document.getElementById("cdCity");
   const cdPincode = document.getElementById("cdPincode");
   const cartCountBadge = document.getElementById("cartCountBadge");
+  const cdTotalRow = document.getElementById('cdTotalRow');
+  const cdCartDivider = document.getElementById('cdCartDivider');
+  const cdCheckoutFormEl = document.getElementById('cdCheckoutForm');
+  const cdShippingHeading = document.getElementById('cdShippingHeading');
+  const cdShippingNotes = document.getElementById('cdShippingNotes');
+  const cdContinueBtn = document.getElementById('cdContinueBtn');
+
+  // Basic India PIN code validation helpers
+  function isValidIndianPincode(pin){
+    return /^[1-9][0-9]{5}$/.test(String(pin||'').trim());
+  }
+  try {
+    if (cdPincode) {
+      cdPincode.addEventListener('input', function(){
+        // Keep only digits, limit to 6
+        this.value = this.value.replace(/[^0-9]/g,'').slice(0,6);
+        if (isValidIndianPincode(this.value)) this.classList.remove('is-invalid');
+      });
+      cdPincode.addEventListener('blur', function(){
+        this.classList.toggle('is-invalid', !isValidIndianPincode(this.value));
+      });
+    }
+  } catch(_) {}
 
   // In-memory state
   let PRODUCTS = {};
@@ -193,14 +219,14 @@
 
     let mediaHtml = '';
     if (!imgSrcs || imgSrcs.length === 0) {
-      mediaHtml = `<div class="product-media"><img data-src="assets/images/logo.png" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
+      mediaHtml = `<div class="product-media"><img class="cd-product-image" data-pid="${escapeHtml(p.id)}" data-src="assets/images/logo.png" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     } else {
       // Show only the first image on the main page (no carousel, no dots)
-      mediaHtml = `<div class="product-media"><img data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
+      mediaHtml = `<div class="product-media"><img class="cd-product-image" data-pid="${escapeHtml(p.id)}" data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     }
 
     const sizeSelectHtml = sizes.length
-      ? `<select class="form-select form-select-sm card-size" data-id="${escapeHtml(p.id)}">${sizes.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('')}</select>`
+      ? `<div class="cd-size-pills" role="group" aria-label="Choose size" data-id="${escapeHtml(p.id)}">${sizes.map((s, i) => `<button type="button" class="cd-size-pill ${i===0 ? 'selected' : ''}" data-size="${escapeHtml(s)}" aria-pressed="${i===0 ? 'true' : 'false'}">${escapeHtml(s)}</button>`).join('')}</div>`
       : `<div class="small text-muted">One size</div>`;
 
     return `
@@ -340,11 +366,21 @@
             a.textContent = name;
             a.addEventListener('click', (e) => {
               e.preventDefault();
+              // GA4: category selection (desktop pills)
+              try { if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_name: name }); } catch(_){ }
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
-                const section = el.closest('.category-section');
-                (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const section = el.closest('.category-section') || el;
+                // Smooth scroll with fixed navbar offset
+                try {
+                  const fixedNav = document.querySelector('.fixed-navbar');
+                  const offset = (fixedNav ? fixedNav.offsetHeight : 0) + 10;
+                  const top = section.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - offset;
+                  window.scrollTo({ top, behavior: 'smooth' });
+                } catch(_) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }
             });
             li.appendChild(a);
@@ -363,11 +399,20 @@
             a.textContent = name;
             a.addEventListener('click', (e) => {
               e.preventDefault();
+              // GA4: category selection (mobile dropdown)
+              try { if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_name: name }); } catch(_){ }
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
-                const section = el.closest('.category-section');
-                (section || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const section = el.closest('.category-section') || el;
+                try {
+                  const fixedNav = document.querySelector('.fixed-navbar');
+                  const offset = (fixedNav ? fixedNav.offsetHeight : 0) + 10;
+                  const top = section.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop || 0) - offset;
+                  window.scrollTo({ top, behavior: 'smooth' });
+                } catch(_) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
               }
               // Close dropdown and collapse on mobile
               try {
@@ -423,6 +468,28 @@
     });
 
     // Attach handlers
+    // Impressions + view_item: observe cards entering viewport once
+    try {
+      if (typeof IntersectionObserver !== 'undefined' && typeof gtag === 'function') {
+        const seen = new Set();
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const card = entry.target;
+            const pid = card.getAttribute('data-pid');
+            if (!pid || seen.has(pid)) return;
+            seen.add(pid);
+            const p = PRODUCTS[pid];
+            const priceNum = Number(String(p.offer_price || p.price || '0').replace(/[^0-9.-]+/g,'')) || 0;
+            const item = { item_id: String(pid), item_name: String(p.name||''), price: priceNum };
+            gtag('event', 'impression', { items: [item] });
+            gtag('event', 'view_item', { currency: 'INR', value: priceNum, items: [item] });
+            observer.unobserve(card);
+          });
+        }, { threshold: 0.25 });
+        dynamicCatalogRoot.querySelectorAll('.card-product').forEach(card => observer.observe(card));
+      }
+    } catch(_) {}
       // Lazy-load product images with limited concurrency to mitigate Drive 429
         try {
           const imgs = dynamicCatalogRoot.querySelectorAll('.product-media img');
@@ -469,15 +536,25 @@
     dynamicCatalogRoot.querySelectorAll('.btn-add').forEach(b => b.addEventListener('click', e => {
       const id = e.currentTarget.getAttribute('data-id');
       const card = e.currentTarget.closest('.card');
-      const sel = card.querySelector('.card-size');
-      const selectedSize = sel ? sel.value : null;
+      let selectedSize = null;
+      const pill = card.querySelector('.cd-size-pill.selected');
+      if (pill) selectedSize = pill.getAttribute('data-size');
+      else {
+        const sel = card.querySelector('.card-size');
+        if (sel) selectedSize = sel.value;
+      }
       addToCart(id, selectedSize, false);
     }));
     dynamicCatalogRoot.querySelectorAll('.btn-buy').forEach(b => b.addEventListener('click', e => {
       const id = e.currentTarget.getAttribute('data-id');
       const card = e.currentTarget.closest('.card');
-      const sel = card.querySelector('.card-size');
-      const selectedSize = sel ? sel.value : null;
+      let selectedSize = null;
+      const pill = card.querySelector('.cd-size-pill.selected');
+      if (pill) selectedSize = pill.getAttribute('data-size');
+      else {
+        const sel = card.querySelector('.card-size');
+        if (sel) selectedSize = sel.value;
+      }
       addToCart(id, selectedSize, true);
     }));
 
@@ -495,6 +572,15 @@
         const pid = card.getAttribute('data-pid');
         const prod = pid ? PRODUCTS[pid] : null;
         if (!prod) return;
+        // GA4: select_item when image clicked
+        try {
+          if (typeof gtag === 'function') {
+            const priceNum = Number(String(prod.offer_price || prod.price || '0').replace(/[^0-9.-]+/g,'')) || 0;
+            gtag('event', 'select_item', {
+              items: [{ item_id: String(pid), item_name: String(prod.name||''), price: priceNum }]
+            });
+          }
+        } catch(_) {}
         const imgs = tokenToImageSrcs(prod.image_ids || prod.image || prod.images || '') || [];
         if (!imgs.length) return;
         openGalleryOverlay(imgs);
@@ -504,6 +590,17 @@
     // Size chart link click -> open the size chart modal (desktop + mobile)
     dynamicCatalogRoot.querySelectorAll('.size-chart-link').forEach(link => {
       link.addEventListener('click', (e) => { e.preventDefault(); showSizeChartModal(); });
+    });
+
+    // Size pills selection (toggle selected appearance and aria state)
+    dynamicCatalogRoot.querySelectorAll('.cd-size-pills').forEach(group => {
+      group.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('.cd-size-pill');
+        if (!btn) return;
+        group.querySelectorAll('.cd-size-pill').forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed','false'); });
+        btn.classList.add('selected');
+        btn.setAttribute('aria-pressed','true');
+      });
     });
   }
 
@@ -517,6 +614,17 @@
     if(!cart.length){
       cdCartItems.innerHTML = `<div class="text-center text-muted py-4">Your cart is empty</div>`;
       cdCartTotal.textContent = formatPrice(0);
+      // Hide totals and checkout form when empty; disable actions
+      if (cdTotalRow) cdTotalRow.style.display = 'none';
+      if (cdCartDivider) cdCartDivider.style.display = 'none';
+      if (cdCheckoutFormEl) cdCheckoutFormEl.style.display = 'none';
+      if (cdShippingHeading) cdShippingHeading.style.display = 'none';
+      if (cdShippingNotes) cdShippingNotes.style.display = 'none';
+      if (cdClearCart) cdClearCart.style.display = 'none';
+      if (cdCheckoutBtn) cdCheckoutBtn.style.display = 'none';
+      if (cdContinueBtn) cdContinueBtn.style.display = '';
+      if (cdCheckoutBtn) cdCheckoutBtn.disabled = true;
+      if (cdClearCart) cdClearCart.disabled = true;
       return;
     }
     cart.forEach((it, idx) => {
@@ -578,6 +686,17 @@
       cartCountBadge.textContent = cart.reduce((s,i) => s + i.qty, 0);
       cartCountBadge.style.display = cart.length ? 'inline-block' : 'none';
     }
+    // Show totals and checkout when items exist; enable actions
+    if (cdTotalRow) cdTotalRow.style.display = '';
+    if (cdCartDivider) cdCartDivider.style.display = '';
+    if (cdCheckoutFormEl) cdCheckoutFormEl.style.display = '';
+    if (cdShippingHeading) cdShippingHeading.style.display = '';
+    if (cdShippingNotes) cdShippingNotes.style.display = '';
+    if (cdClearCart) cdClearCart.style.display = '';
+    if (cdCheckoutBtn) cdCheckoutBtn.style.display = '';
+    if (cdContinueBtn) cdContinueBtn.style.display = '';
+    if (cdCheckoutBtn) cdCheckoutBtn.disabled = false;
+    if (cdClearCart) cdClearCart.disabled = false;
   }
 
   // Add to Cart: merge by id+size; use offer price when available
@@ -592,6 +711,23 @@
     const existing = cart.find(it => it.id === id && (it.size || '') === (size || ''));
     if(existing) existing.qty += 1;
     else cart.push({ id, name: p.name, price: effectivePrice, qty: 1, size: size || null, image });
+
+    // GA4: add_to_cart event
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'add_to_cart', {
+          value: effectivePrice,
+          currency: 'INR',
+          items: [{
+            item_id: String(id),
+            item_name: String(p.name || ''),
+            item_variant: size || undefined,
+            price: effectivePrice,
+            quantity: 1
+          }]
+        });
+      }
+    } catch(_) {}
     saveCart();
     if(openModal) {
       const modalEl = document.getElementById('cdStoreCartModal');
@@ -629,15 +765,44 @@
       alert('Please fill customer details.');
       return;
     }
+    if (!isValidIndianPincode(cdPincode.value)) {
+      cdPincode.classList.add('is-invalid');
+      alert('Please enter a valid 6-digit PIN code.');
+      return;
+    }
 
-    let msg = `New Order - Cathy's Dreamy Attire\n\n`;
+    let msg = `Hello! I’d like to order the following items.\n\n`;
     cart.forEach(it => { msg += `${it.id} (${it.size || 'N/A'}) x ${it.qty}\n`; });
     const total = cart.reduce((s, it) => s + it.price * it.qty, 0);
     msg += `\nTotal: ₹${total}\n\n`;
     msg += `Customer:\n${cdName.value.trim()}\n${cdAddress.value.trim()}, ${cdCity.value.trim()} - ${cdPincode.value.trim()}\n`;
     const phone = "917907555924";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+
+    // GA4: begin_checkout with callback to open WhatsApp
+    try {
+      if (typeof gtag === 'function') {
+        const items = cart.map(it => ({
+          item_id: String(it.id),
+          item_name: String(it.name || ''),
+          item_variant: it.size || undefined,
+          price: Number(it.price) || 0,
+          quantity: Number(it.qty) || 1
+        }));
+        let opened = false;
+        const navigate = () => { if (!opened) { opened = true; window.open(url, '_blank'); } };
+        gtag('event', 'begin_checkout', {
+          value: total,
+          currency: 'INR',
+          items,
+          event_callback: navigate,
+          event_timeout: 1500
+        });
+        setTimeout(navigate, 1600);
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch(_) { window.open(url, '_blank'); }
     cart = [];
     saveCart();
     renderCartItems();
@@ -727,6 +892,9 @@
     }
     const showThreshold = 300;
     function updateVisibility(){
+      // Hide entirely on mobile view
+      const w = window.innerWidth || document.documentElement.clientWidth || 0;
+      if (w <= 576) { btn.style.display = 'none'; return; }
       const y = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
       btn.style.display = y > showThreshold ? 'inline-flex' : 'none';
     }

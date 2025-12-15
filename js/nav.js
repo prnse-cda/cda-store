@@ -51,4 +51,23 @@
       collapseEl.addEventListener('hidden.bs.collapse', updateSolid);
     }
   })();
+
+  // Append mobile-only socials (Instagram/Facebook) at bottom of the collapsed menu
+  try {
+    if (collapseEl && !collapseEl.querySelector('.navbar-mobile-socials')) {
+      var socials = document.createElement('div');
+      socials.className = 'navbar-mobile-socials d-lg-none';
+      socials.innerHTML = `
+        <hr class="mt-3 mb-2" />
+        <div class="d-flex align-items-center justify-content-start gap-3 pb-3 ps-2">
+          <a href="https://www.instagram.com/cathys_dreamy_attire/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="text-decoration-none">
+            <i class="fa fa-instagram fa-2x"></i>
+          </a>
+          <a href="https://www.facebook.com/CathysDreamyAttire/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="text-decoration-none">
+            <i class="fa fa-facebook-square fa-2x"></i>
+          </a>
+        </div>`;
+      collapseEl.appendChild(socials);
+    }
+  } catch(_) {}
 })();
