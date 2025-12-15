@@ -193,10 +193,10 @@
 
     let mediaHtml = '';
     if (!imgSrcs || imgSrcs.length === 0) {
-      mediaHtml = `<div class="product-media"><img data-src="assets/images/logo.png" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
+      mediaHtml = `<div class="product-media"><img class="cd-product-image" data-pid="${escapeHtml(p.id)}" data-src="assets/images/logo.png" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     } else {
       // Show only the first image on the main page (no carousel, no dots)
-      mediaHtml = `<div class="product-media"><img data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
+      mediaHtml = `<div class="product-media"><img class="cd-product-image" data-pid="${escapeHtml(p.id)}" data-src="${escapeHtml(imgSrcs[0])}" alt="${escapeHtml(p.name)}" loading="lazy" /></div>`;
     }
 
     const sizeSelectHtml = sizes.length
@@ -340,6 +340,8 @@
             a.textContent = name;
             a.addEventListener('click', (e) => {
               e.preventDefault();
+              // GA4: category selection (desktop pills)
+              try { if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_name: name }); } catch(_){ }
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
@@ -363,6 +365,8 @@
             a.textContent = name;
             a.addEventListener('click', (e) => {
               e.preventDefault();
+              // GA4: category selection (mobile dropdown)
+              try { if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_name: name }); } catch(_){ }
               const id = `cat-${name}`;
               const el = document.getElementById(id);
               if (el) {
@@ -423,6 +427,28 @@
     });
 
     // Attach handlers
+    // Impressions + view_item: observe cards entering viewport once
+    try {
+      if (typeof IntersectionObserver !== 'undefined' && typeof gtag === 'function') {
+        const seen = new Set();
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const card = entry.target;
+            const pid = card.getAttribute('data-pid');
+            if (!pid || seen.has(pid)) return;
+            seen.add(pid);
+            const p = PRODUCTS[pid];
+            const priceNum = Number(String(p.offer_price || p.price || '0').replace(/[^0-9.-]+/g,'')) || 0;
+            const item = { item_id: String(pid), item_name: String(p.name||''), price: priceNum };
+            gtag('event', 'impression', { items: [item] });
+            gtag('event', 'view_item', { currency: 'INR', value: priceNum, items: [item] });
+            observer.unobserve(card);
+          });
+        }, { threshold: 0.25 });
+        dynamicCatalogRoot.querySelectorAll('.card-product').forEach(card => observer.observe(card));
+      }
+    } catch(_) {}
       // Lazy-load product images with limited concurrency to mitigate Drive 429
         try {
           const imgs = dynamicCatalogRoot.querySelectorAll('.product-media img');
@@ -495,6 +521,15 @@
         const pid = card.getAttribute('data-pid');
         const prod = pid ? PRODUCTS[pid] : null;
         if (!prod) return;
+        // GA4: select_item when image clicked
+        try {
+          if (typeof gtag === 'function') {
+            const priceNum = Number(String(prod.offer_price || prod.price || '0').replace(/[^0-9.-]+/g,'')) || 0;
+            gtag('event', 'select_item', {
+              items: [{ item_id: String(pid), item_name: String(prod.name||''), price: priceNum }]
+            });
+          }
+        } catch(_) {}
         const imgs = tokenToImageSrcs(prod.image_ids || prod.image || prod.images || '') || [];
         if (!imgs.length) return;
         openGalleryOverlay(imgs);
@@ -592,6 +627,23 @@
     const existing = cart.find(it => it.id === id && (it.size || '') === (size || ''));
     if(existing) existing.qty += 1;
     else cart.push({ id, name: p.name, price: effectivePrice, qty: 1, size: size || null, image });
+
+    // GA4: add_to_cart event
+    try {
+      if (typeof gtag === 'function') {
+        gtag('event', 'add_to_cart', {
+          value: effectivePrice,
+          currency: 'INR',
+          items: [{
+            item_id: String(id),
+            item_name: String(p.name || ''),
+            item_variant: size || undefined,
+            price: effectivePrice,
+            quantity: 1
+          }]
+        });
+      }
+    } catch(_) {}
     saveCart();
     if(openModal) {
       const modalEl = document.getElementById('cdStoreCartModal');
@@ -630,14 +682,38 @@
       return;
     }
 
-    let msg = `New Order - Cathy's Dreamy Attire\n\n`;
+    let msg = `Hello! I’d like to order the following items.\n\n`;
     cart.forEach(it => { msg += `${it.id} (${it.size || 'N/A'}) x ${it.qty}\n`; });
     const total = cart.reduce((s, it) => s + it.price * it.qty, 0);
     msg += `\nTotal: ₹${total}\n\n`;
     msg += `Customer:\n${cdName.value.trim()}\n${cdAddress.value.trim()}, ${cdCity.value.trim()} - ${cdPincode.value.trim()}\n`;
     const phone = "917907555924";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+
+    // GA4: begin_checkout with callback to open WhatsApp
+    try {
+      if (typeof gtag === 'function') {
+        const items = cart.map(it => ({
+          item_id: String(it.id),
+          item_name: String(it.name || ''),
+          item_variant: it.size || undefined,
+          price: Number(it.price) || 0,
+          quantity: Number(it.qty) || 1
+        }));
+        let opened = false;
+        const navigate = () => { if (!opened) { opened = true; window.open(url, '_blank'); } };
+        gtag('event', 'begin_checkout', {
+          value: total,
+          currency: 'INR',
+          items,
+          event_callback: navigate,
+          event_timeout: 1500
+        });
+        setTimeout(navigate, 1600);
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch(_) { window.open(url, '_blank'); }
     cart = [];
     saveCart();
     renderCartItems();
