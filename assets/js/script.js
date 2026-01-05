@@ -1,11 +1,16 @@
 'use strict';
 
-
-
 /**
- * navbar toggle
+ * ============================================
+ * CDA - Main Script
+ * ============================================
+ * Handles navigation, URL routing, policy overlays, and UI interactions
  */
 
+/**
+ * Mobile Navigation Toggle
+ * Opens/closes the mobile menu and overlay
+ */
 const overlay = document.querySelector("[data-overlay]");
 const navOpenBtn = document.querySelector("[data-nav-open-btn]");
 const navbar = document.querySelector("[data-navbar]");
@@ -20,12 +25,10 @@ for (let i = 0; i < navElems.length; i++) {
   });
 }
 
-
-
 /**
- * header & go top btn active on page scroll
+ * Header & Scroll-to-Top Button
+ * Makes header sticky and shows scroll button when user scrolls down
  */
-
 const header = document.querySelector("[data-header]");
 const goTopBtn = document.querySelector("[data-go-top]");
 
@@ -40,19 +43,26 @@ window.addEventListener("scroll", function () {
 });
 
 /**
- * Shop dropdown & Contact scroll
+ * Shop Dropdown & URL-Based Navigation System
+ * Handles:
+ * - Mobile dropdown menu toggle
+ * - Product deep links (#product=ABC123&size=M)
+ * - Collection filtering (#collection=Final+Sale)
+ * - Category filtering (#filter=CO-ORDS)
+ * - Section navigation (#hero-section, #site-footer, etc.)
  */
 document.addEventListener('DOMContentLoaded', function(){
   
   /**
-   * Dropdown toggle for mobile and close on click for desktop
+   * Shop Dropdown Toggle (Mobile)
+   * Desktop: Click anywhere closes menu
+   * Mobile: Click SHOP link toggles dropdown
    */
   const dropdownParent = document.querySelector('.navbar-item.has-dropdown');
   const dropdownLink = dropdownParent?.querySelector('.navbar-link');
   const dropdownMenu = dropdownParent?.querySelector('.dropdown-menu');
   
   if (dropdownParent && dropdownLink) {
-    // Mobile: Toggle dropdown on SHOP link click, prevent navbar close
     dropdownLink.addEventListener('click', function(e) {
       if (window.innerWidth <= 991) {
         e.preventDefault();
@@ -63,25 +73,27 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   
   /**
-   * URL Hash Navigation System
+   * URL Hash Navigation Handler
+   * Supports multiple URL patterns for deep linking
    */
   function handleHashNavigation() {
     const hash = window.location.hash;
     
+    // Home page (no hash or #hero-section)
     if (!hash || hash === '#' || hash === '#hero-section') {
-      // Home - scroll to top
       window.scrollTo({top: 0, behavior: 'smooth'});
       return;
     }
     
-    // Check if it's a product URL (#product=ABC&size=M or #product=ABC)
+    // Product detail modal (#product=ABC&size=M)
+    // Example: #product=LPL-1001&size=M
     if (hash.startsWith('#product=')) {
       const params = new URLSearchParams(hash.substring(1));
       const productId = params.get('product');
       const size = params.get('size');
       
       if (productId && window.openProductDetail) {
-        // Wait for products to load, then open modal
+        // Wait for CSV products to load
         setTimeout(function() {
           window.openProductDetail(productId, size);
         }, 1000);
@@ -89,32 +101,34 @@ document.addEventListener('DOMContentLoaded', function(){
       return;
     }
     
-    // Check if it's a collection URL (#collection=Final+Sale)
+    // Collection filter (#collection=Final+Sale)
+    // Loads specific collection from Google Sheets
     if (hash.startsWith('#collection=')) {
-      const collectionName = decodeURIComponent(hash.substring(12)); // Remove #collection=
+      const collectionName = decodeURIComponent(hash.substring(12));
       setTimeout(function() {
         if (window.selectGroup) {
           window.selectGroup(collectionName);
           document.getElementById('product-section')?.scrollIntoView({behavior: 'smooth'});
         }
-      }, 500);
+      }, 1500);
       return;
     }
     
-    // Check if it's a filter URL (#filter=CO-ORDS)
+    // Category filter (#filter=CO-ORDS)
+    // Filters products by category/tag
     if (hash.startsWith('#filter=')) {
-      const filterLabel = decodeURIComponent(hash.substring(8)); // Remove #filter=
+      const filterLabel = decodeURIComponent(hash.substring(8));
       setTimeout(function() {
         if (window.selectFilter) {
           window.selectFilter(filterLabel);
           document.getElementById('product-section')?.scrollIntoView({behavior: 'smooth'});
         }
-      }, 500);
+      }, 1500);
       return;
     }
     
-    // Regular section navigation
-    const targetId = hash.substring(1); // Remove #
+    // Regular section navigation (#site-footer, #hero-section, etc.)
+    const targetId = hash.substring(1);
     const targetElement = document.getElementById(targetId);
     
     if (targetElement) {
@@ -124,52 +138,31 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
   
-  // Handle hash changes
+  // Listen for URL hash changes
   window.addEventListener('hashchange', handleHashNavigation);
   
-  // Handle initial page load with hash
-  if (window.location.hash) {
-    handleHashNavigation();
-  }
+  // Handle initial page load with hash - wait for CSV data to load
+  window.addEventListener('load', function() {
+    if (window.location.hash) {
+      setTimeout(function() {
+        handleHashNavigation();
+      }, 2000);
+    }
+  });
   
-  // Update navbar link behavior to close mobile menu (except SHOP dropdown)
+  /**
+   * Close Mobile Menu on Navigation
+   * Closes navbar when clicking links (except SHOP dropdown)
+   */
   var navbarLinks = document.querySelectorAll('.navbar-link');
   navbarLinks.forEach(function(link){
     link.addEventListener('click', function(e){
-      // Don't close if it's the SHOP dropdown link
+      // Skip if it's the SHOP dropdown toggle
       if (link.closest('.has-dropdown')) {
         return;
       }
-      // Close mobile nav if open
       navbar?.classList.remove('active');
       overlay?.classList.remove('active');
-    });
-  });
-
-  /**
-   * Policy overlay functionality
-   */
-  // Policy links
-  var policyLinks = document.querySelectorAll('.policy-link');
-  policyLinks.forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var policyType = this.getAttribute('data-policy');
-      openPolicyOverlay(policyType);
-    });
-  });
-  
-  // Footer policy links
-  var footerLinks = document.querySelectorAll('a[href*="policy.html"]');
-  footerLinks.forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var href = this.getAttribute('href');
-      var policyType = '';
-      if (href.includes('shipping')) policyType = 'shipping';
-      else if (href.includes('refund')) policyType = 'refund';
-      else if (href.includes('privacy')) policyType = 'privacy';
-      if (policyType) openPolicyOverlay(policyType);
     });
   });
 
@@ -183,16 +176,10 @@ document.addEventListener('DOMContentLoaded', function(){
       document.getElementById('site-footer').scrollIntoView({ behavior: 'smooth' });
     });
   }
-  
-  // Close overlay on Escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closePolicyOverlay();
-    }
-  });
 
   /**
-   * Auto-update year
+   * Auto-Update Copyright Year
+   * Dynamically sets current year in footer and policy pages
    */
   var yearHome = document.getElementById('yearHome');
   if (yearHome) {
@@ -203,64 +190,3 @@ document.addEventListener('DOMContentLoaded', function(){
     el.textContent = new Date().getFullYear();
   });
 });
-
-/**
- * Policy overlay functions
- */
-function openPolicyOverlay(policyType) {
-  var overlay = document.getElementById('policy-modal');
-  var content = document.getElementById('policy-content');
-  
-  var policyUrl = '';
-  if (policyType === 'shipping') {
-    policyUrl = 'policies/shipping-policy.html';
-  } else if (policyType === 'refund') {
-    policyUrl = 'policies/refund-policy.html';
-  } else if (policyType === 'privacy') {
-    policyUrl = 'policies/privacy-policy.html';
-  }
-  
-  if (policyUrl) {
-    // Fetch and load policy content
-    fetch(policyUrl)
-      .then(response => response.text())
-      .then(html => {
-        // Extract content between <main> tags
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, 'text/html');
-        var section = doc.querySelector('main section');
-        if (section) {
-          // Clone the section and remove the Back to Home button
-          var clonedSection = section.cloneNode(true);
-          var backButton = clonedSection.querySelector('.btn.btn-primary');
-          if (backButton && backButton.parentElement) {
-            backButton.parentElement.remove();
-          }
-          content.innerHTML = clonedSection.innerHTML;
-        } else {
-          content.innerHTML = '<div style="padding: 40px;"><h2>Content not found</h2></div>';
-        }
-        overlay.style.display = 'block';
-        setTimeout(function() {
-          overlay.classList.add('active');
-        }, 10);
-      })
-      .catch(error => {
-        console.error('Error loading policy:', error);
-        content.innerHTML = '<div style="padding: 40px; text-align: center;"><h2>Error loading policy</h2><p>Please try again later.</p></div>';
-        overlay.style.display = 'block';
-        setTimeout(function() {
-          overlay.classList.add('active');
-        }, 10);
-      });
-  }
-}
-
-function closePolicyOverlay() {
-  var overlay = document.getElementById('policy-modal');
-  overlay.classList.remove('active');
-  setTimeout(function() {
-    overlay.style.display = 'none';
-    document.getElementById('policy-content').innerHTML = '';
-  }, 400);
-}

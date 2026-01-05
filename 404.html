@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Twinkle+Star&display=swap" rel="stylesheet">
+  
+  <style>
+    .error-404 {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .error-404-content {
+      max-width: 600px;
+    }
+    
+    .error-404-code {
+      font-size: 120px;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .error-404-title {
+      font-size: 36px;
+      color: white;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    
+    .error-404-text {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    
+    .error-404-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .error-404-btn {
+      padding: 15px 35px;
+      background: white;
+      color: #667eea;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .error-404-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      background: #f0f0f0;
+    }
+    
+    .error-404-btn.secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    .error-404-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .error-404-icon {
+      font-size: 100px;
+      color: white;
+      opacity: 0.3;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+      .error-404-code {
+        font-size: 80px;
+      }
+      
+      .error-404-title {
+        font-size: 28px;
+      }
+      
+      .error-404-text {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="error-404">
+    <div class="error-404-content">
+      <ion-icon name="sad-outline" class="error-404-icon"></ion-icon>
+      <div class="error-404-code">404</div>
+      <h1 class="error-404-title">Oops! Page Not Found</h1>
+      <p class="error-404-text">
+        The page you're looking for seems to have wandered off. 
+        Don't worry, let's get you back to shopping!
+      </p>
+      <div class="error-404-buttons">
+        <a href="index.html" class="error-404-btn">
+          <ion-icon name="home"></ion-icon>
+          Go Home
+        </a>
+        <a href="index.html#collection-section" class="error-404-btn secondary">
+          <ion-icon name="bag"></ion-icon>
+          Browse Products
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ionicon link -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+</body>
+</html>

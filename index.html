@@ -2,10 +2,73 @@
 <html lang="en">
 
 <head>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WYB41RBFGS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-WYB41RBFGS');
+  </script>
+
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cdastore - Online Shopping</title>
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://www.googletagmanager.com https://www.instagram.com; style-src 'self' 'unsafe-inline' https://use.fontawesome.com https://fonts.googleapis.com; font-src 'self' https://use.fontawesome.com https://fonts.gstatic.com; img-src 'self' data: https: http:; connect-src 'self' https://docs.google.com https://drive.google.com https://*.googleusercontent.com https://www.google-analytics.com https://unpkg.com; frame-src https://www.instagram.com;">
+  
+  <title>Cathy's Dreamy Attire - Shop Online | Co-Ords, Kurtas & More</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Shop beautiful ethnic wear for women. Discover co-ords, A-line kurtas, salwar kurtas and more. Free shipping across India. Quality handcrafted garments.">
+  <meta name="keywords" content="ethnic wear, women fashion, co-ords, kurtas, salwar, Indian wear, online shopping, free shipping">
+  <meta name="author" content="Cathy's Dreamy Attire">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cdastore.in/">
+  <meta property="og:title" content="Cathy's Dreamy Attire - Beautiful Ethnic Wear for Women">
+  <meta property="og:description" content="Shop co-ords, kurtas, and ethnic wear online. Free shipping across India. Stay Cool, Stay You.">
+  <meta property="og:image" content="https://cdastore.in/assets/images/logo.png">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://cdastore.in/">
+  <meta property="twitter:title" content="Cathy's Dreamy Attire - Beautiful Ethnic Wear">
+  <meta property="twitter:description" content="Shop co-ords, kurtas, and ethnic wear online. Free shipping across India.">
+  <meta property="twitter:image" content="https://cdastore.in/assets/images/logo.png">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://cdastore.in/">
+  
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "Cathy's Dreamy Attire",
+    "description": "Online ethnic wear store offering co-ords, kurtas, and traditional Indian garments for women",
+    "url": "https://cdastore.in/",
+    "logo": "https://cdastore.in/assets/images/logo.png",
+    "image": "https://cdastore.in/assets/images/logo.png",
+    "priceRange": "₹₹",
+    "telephone": "+91-9876543210",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "IN"
+    },
+    "sameAs": [
+      "https://www.instagram.com/yourprofile/"
+    ],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://cdastore.in/#search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 
   <!-- 
     - custom css link
@@ -13,7 +76,9 @@
   <link rel="stylesheet" href="./assets/css/style.css">
 
   <!-- Font Awesome 5 (icons used throughout the site) -->
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" 
+        integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" 
+        crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css" crossorigin="anonymous">
 
   <!-- 
@@ -30,6 +95,18 @@
 <body id="top">
 
   <!-- 
+    - #PRELOADER
+  -->
+
+  <div id="preloader" class="preloader">
+    <div class="preloader-content">
+      <img src="assets/images/logo.png" alt="Loading..." class="preloader-logo">
+      <div class="preloader-spinner"></div>
+      <p class="preloader-text">Loading...</p>
+    </div>
+  </div>
+
+  <!-- 
     - #HEADER
   -->
 
@@ -40,7 +117,7 @@
 
         <!-- Brand: title + small red tagline centered below -->
         <a class="navbar-brand" href="/">
-          <span class="navbar-brand-text">Cathy's Dreamy Attire</span>
+          <span class="navbar-brand-text"></span>
           <span class="navbar-brand-subtext text-danger">Stay Cool . Stay You</span>
         </a>
 
@@ -121,7 +198,7 @@
       <section class="section collection" id="collection-section">
         <div class="container">
 
-          <h2 class="h2 section-title">Collections</h2>
+          <h2 class="h2 section-title">Featured Collections</h2>
 
           <ul class="collection-list has-scrollbar" id="collection-list"></ul>
 
@@ -136,7 +213,7 @@
       <section class="section product" id="product-section">
         <div class="container">
 
-          <h2 class="h2 section-title" id="product-section-title">Bestsellers Products</h2>
+          <h2 class="h2 section-title" id="product-section-title">Explore Our Products</h2>
 
           <ul class="filter-list" id="filter-list"></ul>
 
@@ -167,7 +244,7 @@
                   <h3 class="h4 card-title">Free Shiping</h3>
 
                   <p class="card-text">
-                    All India Free Shipping. Please read our <a href="#" class="policy-link" data-policy="shipping">Shipping Policy</a>.
+                    All India Free Shipping. Please read our <a href="policies/shipping-policy.html">Shipping Policy</a>.
                   </p>
                 </div>
 
@@ -203,7 +280,7 @@
                   <h3 class="h4 card-title">Free Returns</h3>
 
                   <p class="card-text">
-                    One of the many reasons you can shop with peace of mind. Please read our <a href="#" class="policy-link" data-policy="refund">Return Policy</a>.
+                    One of the many reasons you can shop with peace of mind. Please read our <a href="policies/refund-policy.html">Return Policy</a>.
                   </p>
                 </div>
 
@@ -265,7 +342,7 @@
             <img src="assets/images/logo.png" alt="" class="penguin-logo img-fluid" />
           </a>
           <p>
-            At <strong>Cathy’s Dreamy Attire™</strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
+            At <strong class="footer-brand-name"></strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
             We specialize in custom designing, personalized outfit customization, and offer a handpicked collection through our exclusive online boutique.
           </p>
           <hr />
@@ -369,7 +446,7 @@
       <div class="container">
 
         <p class="copyright">
-          ©<span id="yearHome"></span> • Cathy’s Dreamy Attire™ • All Rights Reserved
+          ©<span id="yearHome"></span> • <strong class="footer-brand-name"></strong> • All Rights Reserved
         </p>
 
       </div>
@@ -385,6 +462,45 @@
     <ion-icon name="arrow-up-outline"></ion-icon>
   </a>
 
+  <!-- Floating WhatsApp Button -->
+  <a href="https://wa.me/919876543210" class="floating-whatsapp" target="_blank" rel="noopener noreferrer">
+    <span class="floating-whatsapp-tooltip">Chat with us!</span>
+    <ion-icon name="logo-whatsapp"></ion-icon>
+  </a>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="bottom-nav">
+    <ul class="bottom-nav-list">
+      <li class="bottom-nav-item">
+        <a href="#top" class="bottom-nav-link active">
+          <ion-icon name="home"></ion-icon>
+          <span>Home</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <a href="#collection-section" class="bottom-nav-link">
+          <ion-icon name="grid"></ion-icon>
+          <span>Shop</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <a href="#" class="bottom-nav-link" id="bottom-nav-cart">
+          <div style="position: relative;">
+            <ion-icon name="bag"></ion-icon>
+            <span class="bottom-nav-badge" id="bottomNavCartBadge" style="display:none;">0</span>
+          </div>
+          <span>Cart</span>
+        </a>
+      </li>
+      <li class="bottom-nav-item">
+        <a href="#contact" class="bottom-nav-link" id="bottom-nav-whatsapp">
+          <ion-icon name="logo-whatsapp"></ion-icon>
+          <span>Chat</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
   <!-- 
     - custom js link
   -->
@@ -392,14 +508,25 @@
   <!-- PapaParse for CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- Core site scripts and features -->
-  <script src="./assets/js/store.js"></script>
-
-  <!-- CSV-driven renderers for Footcap sections -->
+  <!-- Load scripts in order - DO NOT CHANGE ORDER -->
+  
+  <!-- 1. Configuration (edit config.js to customize) -->
+  <script src="./assets/js/config.js"></script>
+  
+  <!-- 2. Shared utilities (common functions) -->
+  <script src="./assets/js/utils.js"></script>
+  
+  <!-- 3. CSV data loader and renderer -->
   <script src="./assets/js/csv-render.js"></script>
-
-  <!-- Footcap template script -->
+  
+  <!-- 4. Product modal and cart management -->
+  <script src="./assets/js/store.js"></script>
+  
+  <!-- 5. Navigation and UI interactions -->
   <script src="./assets/js/script.js"></script>
+  
+  <!-- 6. Additional enhancements -->
+  <script src="./assets/js/enhancements.js"></script>
 
   <!-- Wire bag icon to cart modal -->
   <script>
@@ -411,25 +538,42 @@
       // Header cart (always visible)
       var headerCart = document.getElementById('header-cart-btn');
       if (headerCart) headerCart.addEventListener('click', function(){ if (window.cdShowCart) window.cdShowCart(); });
+      
+      // Bottom nav cart (mobile)
+      var bottomNavCart = document.getElementById('bottom-nav-cart');
+      if (bottomNavCart) bottomNavCart.addEventListener('click', function(e){ 
+        e.preventDefault();
+        if (window.cdShowCart) window.cdShowCart(); 
+      });
+      
+      // Bottom nav WhatsApp (mobile) - opens WhatsApp with number from CSV
+      var bottomNavWhatsApp = document.getElementById('bottom-nav-whatsapp');
+      if (bottomNavWhatsApp) {
+        bottomNavWhatsApp.addEventListener('click', function(e){
+          if (window.WHATSAPP_NUMBER) {
+            e.preventDefault();
+            var waText = encodeURIComponent("Hello, " + window.BRAND_NAME);
+            window.open('https://wa.me/' + window.WHATSAPP_NUMBER + '?text=' + waText, '_blank');
+          } else {
+            // Fallback to contact section if number not loaded yet
+            e.preventDefault();
+            document.getElementById('contact').scrollIntoView({behavior: 'smooth'});
+          }
+        });
+      }
+    });
+    // Update footer brand names
+    var footerBrands = document.querySelectorAll('.footer-brand-name');
+    footerBrands.forEach(function(el) {
+      el.textContent = window.BRAND_NAME + '™';
     });
   </script>
-
-  <!-- Policy Modal -->
-  <div id="policy-modal" class="policy-overlay" style="display:none;">
-    <button class="policy-close-btn" onclick="closePolicyOverlay()">&times;</button>
-    <div class="policy-content" id="policy-content">
-      <!-- Policy content loaded here -->
-    </div>
-  </div>
 
   <!-- 
     - ionicon link
   -->
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
-  <!-- Instagram embed script -->
-  <script async src="https://www.instagram.com/embed.js"></script>
 
 </body>
 

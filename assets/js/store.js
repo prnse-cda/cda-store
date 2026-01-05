@@ -1,44 +1,51 @@
+/**
+ * ============================================
+ * CDA - Product Store & Cart
+ * ============================================
+ * Handles product detail modal, cart operations, and checkout
+ * Features:
+ * - Flipkart-style product detail modal with image gallery
+ * - Size selection and quantity management
+ * - Shopping cart with local storage persistence
+ * - WhatsApp checkout integration
+ * - Product sharing functionality
+ */
+
 // store.js - Product detail modal and cart management
 (() => {
-  let PRODUCTS = {};
-  let cart = [];
+  let PRODUCTS = {}; // Stores all products loaded from CSV
+  let cart = []; // Shopping cart array
 
-  // Register products from CSV
+  /**
+   * NOTE: Notification functions are loaded from utils.js
+   * showNotification(message, type) and showConfirm(message, callback)
+   */
+  const showNotification = window.showNotification || window.CDA.showNotification;
+  const showConfirm = window.showConfirm || window.CDA.showConfirm;
+
+  /**
+   * NOTE: Drive utility functions are loaded from utils.js
+   * extractDriveId, driveThumb, tokenToImgs available globally
+   */
+  const extractDriveId = window.extractDriveId || window.CDA.extractDriveId;
+  const driveThumb = window.driveThumb || window.CDA.driveThumb;
+  const tokenToImgs = window.tokenToImgs || window.CDA.tokenToImgs;
+
+  /**
+   * Register Product from CSV
+   * Called by csv-render.js for each product loaded
+   * @param {Object} product - Product data object with id, name, price, etc.
+   */
   window.cdRegisterProduct = function(product) {
     if (product && product.id) {
       PRODUCTS[product.id] = product;
     }
   };
 
-  // Utility to extract Drive IDs and create image URLs
-  function extractDriveId(token) {
-    if (!token) return null;
-    const s = String(token).trim();
-    if (/^[a-zA-Z0-9_-]{20,}$/.test(s)) return s;
-    const patterns = [
-      /\/d\/([a-zA-Z0-9_-]{20,})/,
-      /[?&]id=([a-zA-Z0-9_-]{20,})/
-    ];
-    for (let i = 0; i < patterns.length; i++) {
-      const m = s.match(patterns[i]);
-      if (m && m[1]) return m[1];
-    }
-    return null;
-  }
-
-  function driveThumb(id, size) {
-    return `https://drive.google.com/thumbnail?id=${id}&sz=w${size || 800}`;
-  }
-
-  function tokenToImgs(token) {
-    if (!token) return [];
-    return String(token).split(/[,;]/).map(s => s.trim()).filter(Boolean).map(t => {
-      const id = extractDriveId(t);
-      return id ? driveThumb(id, 800) : t;
-    });
-  }
-
-  // Create Flipkart-style product detail modal
+  /**
+   * Create Product Detail Modal HTML Structure
+   * Builds Flipkart-style modal with image gallery and product details
+   */
   function createProductModal() {
     const modalHTML = `
       <div id="product-detail-modal" class="product-modal-overlay" style="display:none;">
@@ -79,6 +86,9 @@
                 <a href="#" class="helper-link" id="size-chart-link">
                   <i class="fas fa-ruler"></i> Find your size
                 </a>
+                <a href="#" class="helper-link" id="fabric-link" style="display:none;">
+                  <i class="fas fa-tshirt"></i> View Fabric
+                </a>
                 <a href="#" class="helper-link" id="return-policy-link">
                   Return Policy
                 </a>
@@ -88,6 +98,11 @@
                 <a href="#" class="helper-link" id="insta-link" style="display:none;" target="_blank" rel="noopener">
                   <i class="fab fa-instagram"></i> View on Instagram
                 </a>
+              </div>
+              <div class="product-reviews-section" id="product-reviews-section" style="display:none;">
+                <h3 class="reviews-title">Customer Reviews</h3>
+                <div class="reviews-summary" id="reviews-summary"></div>
+                <div class="reviews-list" id="reviews-list"></div>
               </div>
             </div>
           </div>
@@ -106,6 +121,107 @@
     // Add styles
     const styles = `
       <style>
+        /* Custom Notifications */
+        .custom-notification {
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          background: white;
+          padding: 16px 24px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 100000;
+          font-size: 1.5rem;
+          font-weight: 500;
+          transform: translateX(400px);
+          transition: transform 0.3s ease;
+          max-width: 350px;
+        }
+
+        .custom-notification.show {
+          transform: translateX(0);
+        }
+
+        .custom-notification-success {
+          border-left: 4px solid #4CAF50;
+          color: #2E7D32;
+        }
+
+        .custom-notification-error {
+          border-left: 4px solid #f44336;
+          color: #C62828;
+        }
+
+        .custom-notification-info {
+          border-left: 4px solid var(--candy-pink);
+          color: var(--dark-brown);
+        }
+
+        /* Custom Confirm Dialog */
+        .custom-confirm-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 100001;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        .custom-confirm-box {
+          background: white;
+          border-radius: 12px;
+          padding: 30px;
+          max-width: 400px;
+          width: 100%;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .custom-confirm-box p {
+          font-size: 1.6rem;
+          color: #333;
+          margin-bottom: 24px;
+          line-height: 1.5;
+        }
+
+        .custom-confirm-buttons {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+
+        .custom-confirm-buttons button {
+          padding: 10px 24px;
+          border-radius: 6px;
+          font-size: 1.4rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+        }
+
+        .btn-confirm-cancel {
+          background: #f5f5f5;
+          color: #666;
+        }
+
+        .btn-confirm-cancel:hover {
+          background: #e0e0e0;
+        }
+
+        .btn-confirm-ok {
+          background: var(--candy-pink);
+          color: white;
+        }
+
+        .btn-confirm-ok:hover {
+          background: #d96169;
+        }
+
         .product-modal-overlay {
           position: fixed;
           top: 0;
@@ -563,6 +679,84 @@
           transform: rotate(90deg);
         }
 
+        .product-reviews-section {
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #e0e0e0;
+        }
+
+        .reviews-title {
+          font-size: 1.5rem;
+          margin-bottom: 15px;
+          color: var(--dark-brown);
+        }
+
+        .reviews-summary {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+
+        .rating-stars {
+          display: flex;
+          gap: 2px;
+        }
+
+        .rating-stars ion-icon {
+          color: #ffc107;
+          font-size: 18px;
+        }
+
+        .rating-text {
+          font-size: 14px;
+          color: #666;
+        }
+
+        .review-item {
+          padding: 15px 0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .review-item:last-child {
+          border-bottom: none;
+        }
+
+        .review-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 8px;
+          flex-wrap: wrap;
+        }
+
+        .review-stars {
+          display: flex;
+          gap: 2px;
+        }
+
+        .review-stars ion-icon {
+          color: #ffc107;
+          font-size: 14px;
+        }
+
+        .review-author {
+          font-weight: 600;
+          color: var(--dark-brown);
+          font-size: 14px;
+        }
+
+        .review-date {
+          font-size: 12px;
+          color: #999;
+        }
+
+        .review-text {
+          font-size: 14px;
+          line-height: 1.6;
+          color: #333;
+        }
+
         @media (max-width: 768px) {
           .product-modal-content {
             flex-direction: column;
@@ -587,10 +781,84 @@
     document.head.insertAdjacentHTML('beforeend', styles);
   }
 
+  // Display product review from inline product data
+  function displayProductReview(product) {
+    const reviewsSection = document.getElementById('product-reviews-section');
+    const reviewsSummary = document.getElementById('reviews-summary');
+    const reviewsList = document.getElementById('reviews-list');
+    
+    if (!reviewsSection || !reviewsSummary || !reviewsList) return;
+    
+    // Hide by default
+    reviewsSection.style.display = 'none';
+    reviewsList.innerHTML = '';
+    reviewsSummary.innerHTML = '';
+    
+    // Check if product has review
+    if (!product.review || !product.rating || product.rating === 0) return;
+    
+    var rating = product.rating;
+    
+    // Display summary with stars
+    var starsHtml = '';
+    for (var i = 1; i <= 5; i++) {
+      if (i <= Math.floor(rating)) {
+        starsHtml += '<ion-icon name="star"></ion-icon>';
+      } else if (i - 0.5 <= rating) {
+        starsHtml += '<ion-icon name="star-half"></ion-icon>';
+      } else {
+        starsHtml += '<ion-icon name="star-outline"></ion-icon>';
+      }
+    }
+    
+    reviewsSummary.innerHTML = '<div class="rating-stars">' + starsHtml + '</div>' +
+      '<div class="rating-text">' + rating.toFixed(1) + ' out of 5</div>';
+    
+    // Display the review if text exists
+    if (product.review_text) {
+      var reviewStarsHtml = '';
+      for (var i = 1; i <= 5; i++) {
+        reviewStarsHtml += '<ion-icon name="' + (i <= rating ? 'star' : 'star-outline') + '"></ion-icon>';
+      }
+      
+      var reviewHtml = '<div class="review-item">' +
+        '<div class="review-header">' +
+          '<div class="review-stars">' + reviewStarsHtml + '</div>' +
+          '<div class="review-author">' + (product.customer_name || 'Verified Customer') + '</div>' +
+          '<div class="review-date">' + (product.review_date || '') + '</div>' +
+        '</div>' +
+        '<div class="review-text">' + product.review_text + '</div>' +
+      '</div>';
+      
+      reviewsList.innerHTML = reviewHtml;
+    }
+    
+    // Show reviews section
+    reviewsSection.style.display = 'block';
+  }
+
   // Open product detail modal
   window.openProductDetail = function(productId, preselectedSize) {
     const product = PRODUCTS[productId];
     if (!product) return;
+
+    // Track product view in Google Analytics
+    if (typeof gtag !== 'undefined') {
+      const effectivePrice = (product.offer_price && product.offer_price !== '0' && product.offer_price !== '') 
+        ? parseFloat(product.offer_price) 
+        : parseFloat(product.price);
+      
+      gtag('event', 'view_item', {
+        currency: 'INR',
+        value: effectivePrice || 0,
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          item_category: product.category,
+          price: effectivePrice || 0
+        }]
+      });
+    }
 
     // Create modal if it doesn't exist
     if (!document.getElementById('product-detail-modal')) {
@@ -777,13 +1045,22 @@
       }
     };
 
-    // Return policy
+    // Return policy - navigate to policy page
     returnPolicyLink.onclick = (e) => {
       e.preventDefault();
-      if (window.openPolicyOverlay) {
-        window.openPolicyOverlay('refund');
-      }
+      window.location.href = 'policies/refund-policy.html';
     };
+    
+    // Fabric link - show only if product has fabric_product_id
+    const fabricLink = document.getElementById('fabric-link');
+    if (product.fabric_product_id && product.fabric_product_id.trim() !== '') {
+      const fabricUrl = window.location.origin + window.location.pathname + '#product=' + product.fabric_product_id;
+      fabricLink.href = fabricUrl;
+      fabricLink.style.display = 'inline-flex';
+      fabricLink.target = '_self';
+    } else {
+      fabricLink.style.display = 'none';
+    }
 
     // Ask a question via WhatsApp
     askQuestionLink.onclick = (e) => {
@@ -796,9 +1073,12 @@
         const waUrl = footerPhoneLink.href.replace(/\?text=[^&]*/, `?text=${message}`);
         window.open(waUrl, '_blank', 'noopener');
       } else {
-        alert('WhatsApp contact not available');
+        showNotification('WhatsApp contact not available', 'error');
       }
     };
+
+    // Display product review if available
+    displayProductReview(product);
 
     // Show modal
     modal.style.display = 'block';
@@ -814,7 +1094,7 @@
   function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
-        alert('Product link copied to clipboard!');
+        showNotification('Product link copied to clipboard!', 'success');
       }).catch(() => {
         fallbackCopyTextToClipboard(text);
       });
@@ -833,9 +1113,9 @@
     textArea.select();
     try {
       document.execCommand('copy');
-      alert('Product link copied to clipboard!');
+      showNotification('Product link copied to clipboard!', 'success');
     } catch (err) {
-      alert('Failed to copy link. Please copy manually: ' + text);
+      showNotification('Failed to copy link. Please copy manually: ' + text, 'error');
     }
     document.body.removeChild(textArea);
   }
@@ -997,6 +1277,21 @@
           margin-bottom: 12px;
         }
 
+        .cart-item-image {
+          width: 80px;
+          height: 80px;
+          flex-shrink: 0;
+          border-radius: 6px;
+          overflow: hidden;
+          background: #f5f5f5;
+        }
+
+        .cart-item-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
         .cart-item-details {
           flex: 1;
         }
@@ -1006,6 +1301,13 @@
           font-weight: 600;
           margin-bottom: 4px;
           color: #333;
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+
+        .cart-item-name:hover {
+          color: var(--candy-pink);
+          text-decoration: underline;
         }
 
         .cart-item-price {
@@ -1427,18 +1729,45 @@
     if (checkoutSection) checkoutSection.style.display = 'block';
     
     cart.forEach((item, idx) => {
+      // Try to get fresh product data if available, otherwise use stored cart data
       const product = PRODUCTS[item.id];
-      if (!product) return;
       
-      const sizes = (product.sizes || '').split(',').map(s => s.trim()).filter(Boolean);
+      // Get sizes from product or from stored cart item
+      const sizesStr = product ? (product.sizes || '') : (item.sizes || '');
+      const sizes = sizesStr.split(',').map(s => s.trim()).filter(Boolean);
+      
+      // Get product image from cart item (already stored)
+      const productImage = item.image || './assets/images/product-1.jpg';
       
       const itemEl = document.createElement('div');
       itemEl.className = 'cart-item';
-      itemEl.innerHTML = `
-        <div class="cart-item-details">
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
-          <div class="cart-item-controls">
+      
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'cart-item-image';
+      const imgEl = document.createElement('img');
+      imgEl.src = productImage;
+      imgEl.alt = item.name;
+      imgEl.loading = 'lazy';
+      imgDiv.appendChild(imgEl);
+      itemEl.appendChild(imgDiv);
+      
+      const detailsDiv = document.createElement('div');
+      detailsDiv.className = 'cart-item-details';
+      
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'cart-item-name';
+      nameDiv.setAttribute('data-product-id', item.id);
+      nameDiv.textContent = item.name;
+      detailsDiv.appendChild(nameDiv);
+      
+      const priceDiv = document.createElement('div');
+      priceDiv.className = 'cart-item-price';
+      priceDiv.textContent = '₹' + item.price.toFixed(2);
+      detailsDiv.appendChild(priceDiv);
+      
+      const controlsDiv = document.createElement('div');
+      controlsDiv.className = 'cart-item-controls';
+      controlsDiv.innerHTML = `
             ${sizes.length ? `
               <div>
                 <label>Size:</label>
@@ -1456,10 +1785,32 @@
               </div>
             </div>
             <button class="cart-item-remove" data-idx="${idx}">Remove</button>
-          </div>
-        </div>
       `;
+      detailsDiv.appendChild(controlsDiv);
+      itemEl.appendChild(detailsDiv);
       itemsList.appendChild(itemEl);
+    });
+    
+    // Make product names clickable
+    itemsList.querySelectorAll('.cart-item-name').forEach(nameEl => {
+      const productId = nameEl.getAttribute('data-product-id');
+      if (productId) {
+        nameEl.style.cursor = 'pointer';
+        nameEl.style.color = 'var(--candy-pink)';
+        nameEl.addEventListener('click', () => {
+          // Close cart modal
+          const cartOverlay = document.getElementById('cart-modal-overlay');
+          if (cartOverlay) cartOverlay.style.display = 'none';
+          
+          // If we have product data loaded (main page), open modal directly
+          if (PRODUCTS[productId] && window.openProductDetail) {
+            window.openProductDetail(productId);
+          } else {
+            // On policy pages, navigate to main page with hash fragment
+            window.location.href = '../index.html#product=' + productId;
+          }
+        });
+      }
     });
     
     // Event listeners
@@ -1526,6 +1877,13 @@
       navBadge.textContent = count;
       navBadge.style.display = count > 0 ? 'inline-block' : 'none';
     }
+    
+    // Update bottom nav cart badge (mobile)
+    const bottomNavBadge = document.getElementById('bottomNavCartBadge');
+    if (bottomNavBadge) {
+      bottomNavBadge.textContent = count;
+      bottomNavBadge.style.display = count > 0 ? 'block' : 'none';
+    }
   }
 
   // Add to cart function
@@ -1556,7 +1914,23 @@
         price: effectivePrice,
         qty: 1,
         size: size || null,
-        image: image
+        image: image,
+        sizes: product.sizes || '' // Store available sizes for dropdown
+      });
+    }
+    
+    // Track add to cart in Google Analytics
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'add_to_cart', {
+        currency: 'INR',
+        value: effectivePrice,
+        items: [{
+          item_id: productId,
+          item_name: product.name,
+          item_category: product.category,
+          price: effectivePrice,
+          quantity: 1
+        }]
       });
     }
     
@@ -1577,6 +1951,23 @@
     renderCart();
     updateCartBadge();
     document.getElementById('cart-modal-overlay').style.display = 'block';
+    
+    // Track cart view in Google Analytics
+    if (typeof gtag !== 'undefined' && cart.length > 0) {
+      const totalValue = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const items = cart.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: item.price,
+        quantity: item.qty
+      }));
+      
+      gtag('event', 'view_cart', {
+        currency: 'INR',
+        value: totalValue,
+        items: items
+      });
+    }
   };
 
   // Attach cart modal events
@@ -1601,12 +1992,12 @@
     
     if (clearBtn) {
       clearBtn.onclick = () => {
-        if (confirm('Clear your cart?')) {
+        showConfirm('Clear your cart?', () => {
           cart = [];
           saveCart();
           renderCart();
           updateCartBadge();
-        }
+        });
       };
     }
     
@@ -1619,54 +2010,178 @@
         overlay.style.display = 'none';
       }
     };
+    
+    // Add real-time validation feedback for form fields
+    const nameField = document.getElementById('customer-name');
+    const addressField = document.getElementById('customer-address');
+    const cityField = document.getElementById('customer-city');
+    const pincodeField = document.getElementById('customer-pincode');
+    
+    if (nameField) {
+      nameField.addEventListener('input', function() {
+        if (this.value.trim().length >= 2 && /^[a-zA-Z\s]+$/.test(this.value.trim())) {
+          this.style.borderColor = '#4CAF50';
+        } else if (this.value.trim().length > 0) {
+          this.style.borderColor = '#ff4444';
+        } else {
+          this.style.borderColor = '#ddd';
+        }
+      });
+    }
+    
+    if (addressField) {
+      addressField.addEventListener('input', function() {
+        if (this.value.trim().length >= 10) {
+          this.style.borderColor = '#4CAF50';
+        } else if (this.value.trim().length > 0) {
+          this.style.borderColor = '#ff4444';
+        } else {
+          this.style.borderColor = '#ddd';
+        }
+      });
+    }
+    
+    if (cityField) {
+      cityField.addEventListener('input', function() {
+        if (this.value.trim().length >= 2 && /^[a-zA-Z\s]+$/.test(this.value.trim())) {
+          this.style.borderColor = '#4CAF50';
+        } else if (this.value.trim().length > 0) {
+          this.style.borderColor = '#ff4444';
+        } else {
+          this.style.borderColor = '#ddd';
+        }
+      });
+    }
+    
+    if (pincodeField) {
+      pincodeField.addEventListener('input', function() {
+        const value = this.value.trim();
+        if (/^[1-9][0-9]{5}$/.test(value)) {
+          this.style.borderColor = '#4CAF50';
+        } else if (value.length > 0) {
+          this.style.borderColor = '#ff4444';
+        } else {
+          this.style.borderColor = '#ddd';
+        }
+      });
+      
+      // Only allow digits
+      pincodeField.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) {
+          e.preventDefault();
+        }
+      });
+    }
   }
 
   // WhatsApp Checkout
   function checkoutViaWhatsApp() {
     if (cart.length === 0) {
-      alert('Cart is empty');
+      showNotification('Cart is empty', 'info');
       return;
     }
     
+    // Get form values
     const name = document.getElementById('customer-name')?.value.trim();
     const address = document.getElementById('customer-address')?.value.trim();
     const landmark = document.getElementById('customer-landmark')?.value.trim();
     const city = document.getElementById('customer-city')?.value.trim();
     const pincode = document.getElementById('customer-pincode')?.value.trim();
     
+    // Validate required fields
     if (!name || !address || !city || !pincode) {
-      alert('Please fill in all customer details.');
+      showNotification('Please fill in all required fields (marked with *).', 'error');
+      // Highlight empty required fields
+      if (!name) document.getElementById('customer-name').style.borderColor = '#ff4444';
+      if (!address) document.getElementById('customer-address').style.borderColor = '#ff4444';
+      if (!city) document.getElementById('customer-city').style.borderColor = '#ff4444';
+      if (!pincode) document.getElementById('customer-pincode').style.borderColor = '#ff4444';
       return;
     }
     
-    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
-      alert('Please enter a valid 6-digit PIN code.');
+    // Track begin checkout in Google Analytics
+    if (typeof gtag !== 'undefined') {
+      const totalValue = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const items = cart.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        price: item.price,
+        quantity: item.qty
+      }));
+      
+      gtag('event', 'begin_checkout', {
+        currency: 'INR',
+        value: totalValue,
+        items: items
+      });
+    }
+    
+    // Validate name (at least 2 characters, only letters and spaces)
+    if (name.length < 2 || !/^[a-zA-Z\s]+$/.test(name)) {
+      showNotification('Please enter a valid name (letters and spaces only).', 'error');
+      document.getElementById('customer-name').style.borderColor = '#ff4444';
+      document.getElementById('customer-name').focus();
       return;
     }
+    
+    // Validate address (at least 10 characters)
+    if (address.length < 10) {
+      showNotification('Please enter a complete address (at least 10 characters).', 'error');
+      document.getElementById('customer-address').style.borderColor = '#ff4444';
+      document.getElementById('customer-address').focus();
+      return;
+    }
+    
+    // Validate city (at least 2 characters, only letters and spaces)
+    if (city.length < 2 || !/^[a-zA-Z\s]+$/.test(city)) {
+      showNotification('Please enter a valid city name (letters and spaces only).', 'error');
+      document.getElementById('customer-city').style.borderColor = '#ff4444';
+      document.getElementById('customer-city').focus();
+      return;
+    }
+    
+    // Validate PIN code (6 digits, doesn't start with 0)
+    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+      showNotification('Please enter a valid 6-digit PIN code (e.g., 560001).', 'error');
+      document.getElementById('customer-pincode').style.borderColor = '#ff4444';
+      document.getElementById('customer-pincode').focus();
+      return;
+    }
+    
+    // Reset all field border colors on successful validation
+    ['customer-name', 'customer-address', 'customer-city', 'customer-pincode'].forEach(id => {
+      const field = document.getElementById(id);
+      if (field) field.style.borderColor = '#ddd';
+    });
     
     // Build WhatsApp message
     let message = `Hello! I'd like to order the following items.\n\n`;
     cart.forEach(item => {
-      message += `${item.name} (${item.size || 'N/A'}) x ${item.qty}\n`;
+      message += `Product ID: ${item.id}\n${item.name} (${item.size || 'N/A'}) x ${item.qty}\n₹${item.price.toFixed(2)} each\n\n`;
     });
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    message += `\nTotal: ₹${total.toFixed(2)}\n\n`;
+    message += `Total: ₹${total.toFixed(2)}\n\n`;
     message += `Customer:\n${name}\n${address}`;
     if (landmark) {
       message += `\nLandmark: ${landmark}`;
     }
     message += `\n${city} - ${pincode}\n`;
     
-    // Get WhatsApp number from footer
+    // Get WhatsApp number from footer (set by CSV)
     const footerPhoneLink = document.getElementById('footer-phone');
-    let phone = '917907555924'; // Default number
+    let phone = '';
     
     if (footerPhoneLink && footerPhoneLink.href.includes('wa.me')) {
       const match = footerPhoneLink.href.match(/wa\.me\/(\d+)/);
       if (match) {
         phone = match[1];
       }
+    }
+    
+    if (!phone) {
+      showNotification('WhatsApp number not configured. Please contact support.', 'error');
+      return;
     }
     
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
