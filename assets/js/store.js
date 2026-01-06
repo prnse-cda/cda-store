@@ -197,7 +197,7 @@
 
         .product-thumb:hover,
         .product-thumb.active {
-          border-color: #E84B3D;
+          border-color: #EC7FA9;
         }
 
         .product-thumb img {
@@ -214,26 +214,26 @@
           font-size: 2.4rem;
           font-weight: 600;
           margin-bottom: 15px;
-          color: #333;
+          color: #BE5985;
         }
 
         .product-modal-price {
           font-size: 2.8rem;
           font-weight: 700;
-          color: #333;
+          color: #BE5985;
           margin-bottom: 20px;
         }
 
         .product-modal-price del {
           font-size: 2rem;
-          color: #999;
+          color: #FFB8E0;
           margin-left: 15px;
           font-weight: 400;
         }
 
         .product-modal-price .discount-badge {
           display: inline-block;
-          background: #E84B3D;
+          background: #EC7FA9;
           color: white;
           padding: 4px 10px;
           border-radius: 4px;
@@ -245,10 +245,10 @@
         .product-modal-description {
           font-size: 1.5rem;
           line-height: 1.6;
-          color: #666;
+          color: #BE5985;
           margin-bottom: 25px;
           padding: 15px;
-          background: #f8f8f8;
+          background: #FFEDFA;
           border-radius: 6px;
         }
 
@@ -302,8 +302,8 @@
         }
 
         .size-option:hover {
-          background: #F6F9FE;
-          color: #174ea6;
+          background: #FFB8E0;
+          color: #BE5985;
           box-shadow: rgba(60, 64, 67, .3) 0 2px 3px 0, rgba(60, 64, 67, .15) 0 6px 10px 4px;
         }
 
@@ -312,7 +312,7 @@
         }
 
         .size-option.selected {
-          background: #174ea6;
+          background: #BE5985;
           color: white;
           box-shadow: rgba(23, 78, 166, .3) 0 2px 3px 0, rgba(23, 78, 166, .15) 0 6px 10px 4px;
         }
@@ -350,7 +350,7 @@
         }
 
         .qty-btn:hover {
-          background: #e0e0e0;
+          background: #FFB8E0;
         }
 
         #qty-input {
@@ -403,14 +403,14 @@
         }
 
         .btn-add-cart:hover {
-          background: #F6F9FE;
-          color: #174ea6;
+          background: #FFB8E0;
+          color: #BE5985;
           box-shadow: rgba(60, 64, 67, .3) 0 2px 3px 0, rgba(60, 64, 67, .15) 0 6px 10px 4px;
         }
 
         .btn-add-cart:focus {
           outline: none;
-          border: 2px solid #4285f4;
+          border: 2px solid #EC7FA9;
           box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
         }
 
@@ -463,14 +463,14 @@
         }
 
         .btn-share:hover {
-          background: #F6F9FE;
-          color: #174ea6;
+          background: #FFB8E0;
+          color: #BE5985;
           box-shadow: rgba(60, 64, 67, .3) 0 2px 3px 0, rgba(60, 64, 67, .15) 0 6px 10px 4px;
         }
 
         .btn-share:focus {
           outline: none;
-          border: 2px solid #4285f4;
+          border: 2px solid #EC7FA9;
           box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
         }
 
@@ -501,7 +501,7 @@
 
         .helper-link {
           font-size: 1.4rem;
-          color: #174ea6;
+          color: #BE5985;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
@@ -510,7 +510,7 @@
         }
 
         .helper-link:hover {
-          color: #0d3a75;
+          color: #EC7FA9;
           text-decoration: underline;
         }
 
