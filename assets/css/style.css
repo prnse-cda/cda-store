@@ -108,8 +108,14 @@
    * typography
    */
   
-  --ff-roboto: 'Roboto', sans-serif;
-  --ff-josefin-sans: 'Josefin Sans', sans-serif;
+  /* Fonts mapped to Google fonts loaded in index.html */
+  --ff-body: 'Nunito Sans', 'Outfit', sans-serif;
+  --ff-heading: 'Outfit', 'Nunito Sans', sans-serif;
+  --ff-ui: 'Funnel Sans', 'Zalando Sans Expanded', sans-serif;
+  --ff-script: 'Petit Formal Script', cursive;
+  /* Keep legacy aliases to avoid broad refactors */
+  --ff-roboto: var(--ff-body);
+  --ff-josefin-sans: var(--ff-heading);
 
   --fs-1: 3rem;
   --fs-2: 2.6rem;
@@ -183,7 +189,7 @@ address {
 }
 
 html {
-  font-family: var(--ff-josefin-sans);
+  font-family: var(--ff-body);
   font-size: 10px;
   scroll-behavior: smooth;
 }
@@ -245,7 +251,7 @@ body {
   cursor: pointer;
   display: inline-flex;
   fill: currentcolor;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-family: var(--ff-ui);
   font-size: 14px;
   font-weight: 500;
   height: 48px;
@@ -429,7 +435,7 @@ body {
   cursor: pointer;
   display: inline-flex;
   fill: currentcolor;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-family: var(--ff-ui);
   font-size: 14px;
   font-weight: 500;
   height: 48px;
@@ -580,7 +586,7 @@ body {
   cursor: pointer;
   display: inline-flex;
   fill: currentcolor;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-family: var(--ff-ui);
   font-size: 14px;
   font-weight: 500;
   height: 48px;
@@ -999,7 +1005,7 @@ body {
   cursor: pointer;
   display: inline-flex;
   fill: currentcolor;
-  font-family: "Google Sans", Roboto, Arial, sans-serif;
+  font-family: var(--ff-ui);
   font-size: 14px;
   font-weight: 500;
   height: 48px;
