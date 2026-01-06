@@ -7,7 +7,11 @@
     insta_links_gid: '1810994710',
     insta_liks_gid: '1810994710',
     contacts_gid: '1117186654',
-    brand_name: "Cathy's Dreamy Attire"
+    brand_name: "Cathy's Dreamy Attire",
+    // Cart constraints
+    max_qty_per_item: 5,
+    // Policy link opening mode: 'path' or 'overlay'
+    policy_open_mode: 'path'
   };
 
   // Published CSV base for this Google Sheet (all sections)

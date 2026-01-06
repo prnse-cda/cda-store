@@ -170,29 +170,32 @@ document.addEventListener('DOMContentLoaded', function(){
   /**
    * Policy overlay functionality
    */
-  // Policy links
-  var policyLinks = document.querySelectorAll('.policy-link');
-  policyLinks.forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var policyType = this.getAttribute('data-policy');
-      openPolicyOverlay(policyType);
+  // Policy link handling
+  var policyMode = (window.CDA_INPUTS && window.CDA_INPUTS.policy_open_mode) || 'path';
+  if (policyMode === 'overlay') {
+    // Intercept policy links to open overlay
+    var policyLinks = document.querySelectorAll('.policy-link');
+    policyLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var policyType = this.getAttribute('data-policy');
+        openPolicyOverlay(policyType);
+      });
     });
-  });
-  
-  // Footer policy links
-  var footerLinks = document.querySelectorAll('a[href*="policy.html"]');
-  footerLinks.forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var href = this.getAttribute('href');
-      var policyType = '';
-      if (href.includes('shipping')) policyType = 'shipping';
-      else if (href.includes('refund')) policyType = 'refund';
-      else if (href.includes('privacy')) policyType = 'privacy';
-      if (policyType) openPolicyOverlay(policyType);
+    // Footer policy links
+    var footerLinks = document.querySelectorAll('a[href*="policy.html"]');
+    footerLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var href = this.getAttribute('href');
+        var policyType = '';
+        if (href.includes('shipping')) policyType = 'shipping';
+        else if (href.includes('refund')) policyType = 'refund';
+        else if (href.includes('privacy')) policyType = 'privacy';
+        if (policyType) openPolicyOverlay(policyType);
+      });
     });
-  });
+  }
 
   // Contact Us link - navigate to footer
   var serviceContactLink = document.getElementById('service-contact-link');

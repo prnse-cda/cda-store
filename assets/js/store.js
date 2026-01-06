@@ -781,13 +781,14 @@
       }
     };
 
-    // Return policy
-    returnPolicyLink.onclick = (e) => {
-      e.preventDefault();
-      if (window.openPolicyOverlay) {
-        window.openPolicyOverlay('refund');
-      }
-    };
+    // Return policy: navigate to path page
+    if (returnPolicyLink) {
+      returnPolicyLink.setAttribute('href', 'policies/refund-policy.html');
+      returnPolicyLink.onclick = (e) => {
+        e.preventDefault();
+        window.location.href = 'policies/refund-policy.html';
+      };
+    }
 
     // Ask a question via WhatsApp
     askQuestionLink.onclick = (e) => {
@@ -865,6 +866,8 @@
   }
 
   cart = loadCart();
+  // Max quantity per item (configurable via inputs.js -> max_qty_per_item)
+  var MAX_QTY_PER_ITEM = (window.CDA_INPUTS && Number(window.CDA_INPUTS.max_qty_per_item)) || 5;
 
   // Create Cart Modal
   function createCartModal() {
@@ -999,6 +1002,22 @@
           border: 1px solid #e0e0e0;
           border-radius: 8px;
           margin-bottom: 12px;
+        }
+        .cart-item-thumb {
+          width: 64px;
+          height: 64px;
+          flex: 0 0 64px;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #f9f9f9;
+          border: 1px solid #eee;
+        }
+
+        .cart-item-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
         }
 
         .cart-item-details {
@@ -1439,6 +1458,7 @@
       const itemEl = document.createElement('div');
       itemEl.className = 'cart-item';
       itemEl.innerHTML = `
+        <div class="cart-item-thumb"><img src="${item.image}" alt="${item.name}" /></div>
         <div class="cart-item-details">
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
@@ -1482,6 +1502,10 @@
     itemsList.querySelectorAll('.qty-plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const idx = parseInt(e.target.getAttribute('data-idx'));
+        if (cart[idx].qty >= MAX_QTY_PER_ITEM) {
+          alert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
+          return;
+        }
         cart[idx].qty += 1;
         saveCart();
         renderCart();
@@ -1552,7 +1576,11 @@
     // Check if item already exists in cart
     const existing = cart.find(item => item.id === productId && (item.size || '') === (size || ''));
     if (existing) {
-      existing.qty += 1;
+      if (existing.qty >= MAX_QTY_PER_ITEM) {
+        alert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
+      } else {
+        existing.qty += 1;
+      }
     } else {
       cart.push({
         id: productId,
