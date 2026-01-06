@@ -1,20 +1,10 @@
 (function(){
-  // CSV-driven rendering for Footcap sections: HERO, COLLECTIONS, PRODUCTS, INSTA, FOOTER
-  // Configure via window.CDA_CSV_CONFIG and optional window.CDA_SHEET_ID
-
-  // Published CSV base for this Google Sheet (all sections)
-  var BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT9RM9PuEfM9qPbZXALjzYFdGEoBiltayHlPSQlY9yEurdsRIQK1fgTfE-Wofkd821fdqADQ6O08Z4x/pub?single=true&output=csv&gid=';
-  window.CDA_PUB_BASE = BASE; // allows gid-only rows in collections to resolve to published CSV
-  window.CDA_CSV_CONFIG = {
-    hero: BASE + '960346259',
-    collections: BASE + '1398601849',
-    insta: BASE + '1810994710',
-    footer: BASE + '1117186654'
-  };
+  // CSV-driven rendering for sections: COLLECTIONS, PRODUCTS, INSTA, FOOTER
+  // Configure via window.CDA_CSV_CONFIG and window.CDA_PUB_BASE (from inputs.js)
 
   var CFG = window.CDA_CSV_CONFIG || {};
   var SHEET_ID = window.CDA_SHEET_ID || null; // optional, used when a row provides only csv_gid
-  var PUB_BASE = window.CDA_PUB_BASE || null; // optional published /d/e/... base ending with &gid=
+  var PUB_BASE = window.CDA_PUB_BASE || null; // published /d/e/... base ending with &gid=
 
   function toPublishedCsv(urlOrGid){
     if (!urlOrGid) return null;
@@ -67,34 +57,7 @@
     });
   }
 
-  // HERO
-  function renderHero(){
-    var el = document.getElementById('hero-section');
-    if (!el || !CFG.hero) return;
-    loadCsv(CFG.hero, function(rows){
-      if (!rows.length) return;
-      var r = rows[0];
-      var title = (r.main_text || r.title || r.Title || '').toString();
-      var sub = (r.sub_text || r.subtext || r.subtitle || '').toString();
-      var textColor = (r.text_color || r.color || r.text_colour || '').toString().trim();
-      var imgTok = r.hero_image || r.image || r.image_id;
-      var imgId = extractDriveId(imgTok);
-      var bg = imgId ? driveThumb(imgId, 1600) : (imgTok || '');
-      if (bg) el.style.backgroundImage = 'url("' + bg + '")';
-      var tEl = document.getElementById('hero-title'); 
-      if (tEl && title) {
-        tEl.innerHTML = title;
-        tEl.style.fontWeight = 'bold';
-        if (textColor) tEl.style.color = textColor;
-      }
-      var sEl = document.getElementById('hero-text'); if (sEl) sEl.textContent = sub || '';
-      var cta = document.getElementById('hero-cta'); if (cta){
-        var txt = (r.button_text || r.cta || '').toString() || 'Shop Now'; cta.querySelector('span').textContent = txt;
-        var link = (r.button_link || r.link || '#').toString();
-        cta.addEventListener('click', function(){ if (link && link !== '#') window.location.href = link; else document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'}); });
-      }
-    });
-  }
+  // HERO removed
 
   // COLLECTIONS + FILTERS + PRODUCTS (lazy)
   var collections = [];
@@ -108,20 +71,19 @@
     var plist = document.getElementById('product-list');
     if (!CFG.collections || !list || !filters || !plist) return;
     loadCsv(CFG.collections, function(rows){
+      // New schema: collection_name, collection_sheet_gid (comma-separated gid values)
       collections = rows.map(function(r){
-        return {
-          // Filter/display label for pills
-          name: (r.product_name || r.product || r.name || r.collection || r.collection_name || '').toString().trim(),
-          // Card title overlay text (prefer collection_name)
-          title: (r.collection_name || r.collection || r.name || r.product_name || '').toString().trim(),
-          priority: Number(r.collection_priority || r.priority || r.Priority || 0) || 0,
-          image: (r.image || r.image_id || r.collection_image || ''),
-          csv_gid: (r.csv_gid || r.gid || '').toString().trim(),
-          csv_url: (r.csv_url || '').toString().trim(),
-          product_priority: Number(r.product_priority || 0) || 0
-        };
-      }).filter(function(c){ return !!c.name; });
-      collections.sort(function(a,b){ return (a.priority||0) - (b.priority||0); });
+        var name = (r.collection_name || r.collection || r.name || '').toString().trim();
+        var gids = (r.collection_sheet_gid || r.csv_gid || r.gid || '').toString().split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+        return gids.map(function(g){
+          return {
+            name: name,
+            title: name,
+            csv_gid: g,
+            csv_url: ''
+          };
+        });
+      }).reduce(function(acc, arr){ return acc.concat(arr); }, []).filter(function(c){ return !!c.name && !!c.csv_gid; });
 
       // Build groups by collection_name/title
       collectionGroups = {};
@@ -135,7 +97,7 @@
       // Render Shop submenu from groups
       renderShopMenu();
 
-      // Cards - render only one card per unique collection_name
+      // Cards - render only one card per unique collection_name (no image in new schema)
       list.innerHTML = '';
       var renderedCollections = {};
       collections.forEach(function(c){
@@ -143,8 +105,7 @@
         // Skip if we already rendered this collection
         if (renderedCollections[collectionKey]) return;
         renderedCollections[collectionKey] = true;
-        
-        var bg = (function(){ var id = extractDriveId(c.image); return id ? driveThumb(id, 1000) : (c.image || ''); })();
+        var bg = '';
         var li = document.createElement('li');
         li.innerHTML = '<div class="collection-card" style="background-image:url(\''+ (bg || './assets/images/collection-1.jpg') +'\')">\
           <h3 class="h4 card-title">'+ (c.title || c.name) +'</h3>\
@@ -253,7 +214,7 @@
 
   function parseProducts(rows, collectionName){
     return rows.map(function(r, idx){
-      var id = (r.id || r.ID || r.Id || String(idx+1)).toString().trim();
+      var id = (r.sku || r.SKU || r.sku_id || r.id || r.ID || r.Id || String(idx+1)).toString().trim();
       return {
         id: id,
         name: collectionName || (r.name || r.Name || r.product || '').toString().trim(),
@@ -413,7 +374,8 @@
       if (social) {
         var waNumRaw = (r.whatsapp || '').toString();
         var waDigits = waNumRaw.replace(/[^0-9]/g, '');
-        var waText = encodeURIComponent("Hello, Cathy's Dreamy Attire");
+        var brand = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name : '';
+        var waText = encodeURIComponent('Hello, ' + brand);
         var socialLinks = [
           { href: (r.instagram || '').toString().trim(), icon: 'logo-instagram' },
           { href: (r.facebook || '').toString().trim(), icon: 'logo-facebook' },
@@ -462,26 +424,36 @@
         }
       }
       // Contact (email + whatsapp number)
-      var addr = document.querySelector('#footer-address .footer-link-text');
-      if (addr) addr.textContent = (r.address || '').toString();
       var phoneA = document.getElementById('footer-phone');
       if (phoneA) {
         var waNum = (r.whatsapp || '').toString();
         var waDigits = waNum.replace(/[^0-9]/g, '');
-        var waText2 = encodeURIComponent("Hello, Cathy's Dreamy Attire");
+        var brand2 = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name : '';
+        var waText2 = encodeURIComponent('Hello, ' + brand2);
         phoneA.href = waDigits ? ('https://wa.me/' + waDigits + '?text=' + waText2) : '#';
         phoneA.target = '_blank';
         phoneA.rel = 'noopener';
         var s = phoneA.querySelector('.footer-link-text'); if (s) s.textContent = waNum;
       }
       var mailA = document.getElementById('footer-email');
-      if (mailA) { var em = (r.email || '').toString(); mailA.href = em ? ('mailto:'+em) : '#'; var s2 = mailA.querySelector('.footer-link-text'); if (s2) s2.textContent = em; }
+      var em = (r.email || '').toString();
+      if (mailA) { mailA.href = em ? ('mailto:'+em) : '#'; var s2 = mailA.querySelector('.footer-link-text'); if (s2) s2.textContent = em; }
+
+      // Expose contacts globally for other modules (policy pages, etc.)
+      try {
+        window.CDA_CONTACTS = {
+          email: em,
+          whatsapp: (r.whatsapp || '').toString().replace(/[^0-9]/g, ''),
+          instagram: (r.instagram || '').toString().trim(),
+          facebook: (r.facebook || '').toString().trim(),
+          pinterest: (r.pinterest || '').toString().trim()
+        };
+      } catch(_) {}
     });
   }
 
   // Init
   document.addEventListener('DOMContentLoaded', function(){
-    renderHero();
     renderCollections();
     renderInsta();
     renderFooter();

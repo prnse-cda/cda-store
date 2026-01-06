@@ -40,7 +40,7 @@
 
         <!-- Brand: title + small red tagline centered below -->
         <a class="navbar-brand" href="/">
-          <span class="navbar-brand-text">Cathy's Dreamy Attire</span>
+          <span class="navbar-brand-text"></span>
           <span class="navbar-brand-subtext text-danger">Stay Cool . Stay You</span>
         </a>
 
@@ -92,26 +92,7 @@
   <main>
     <article>
 
-      <!-- 
-        - #HERO
-      -->
-
-      <section class="section hero" id="hero-section">
-        <div class="container">
-
-          <!-- Hero title and text populated from CSV via csv-render.js renderHero() -->
-          <h2 class="h1 hero-title" id="hero-title"></h2>
-
-          <p class="hero-text" id="hero-text"></p>
-
-          <button class="btn btn-primary" id="hero-cta" type="button">
-            <span>Shop Now</span>
-
-            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-          </button>
-
-        </div>
-      </section>
+      <!-- Hero removed -->
 
 
       <!-- 
@@ -265,7 +246,7 @@
             <img src="assets/images/logo.png" alt="" class="penguin-logo img-fluid" />
           </a>
           <p>
-            At <strong>Cathy’s Dreamy Attire™</strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
+            At <strong id="footer-brand-strong"></strong>, we believe every woman deserves to feel confident and beautiful in outfits made just for her.
             We specialize in custom designing, personalized outfit customization, and offer a handpicked collection through our exclusive online boutique.
           </p>
           <hr />
@@ -369,7 +350,7 @@
       <div class="container">
 
         <p class="copyright">
-          ©<span id="yearHome"></span> • Cathy’s Dreamy Attire™ • All Rights Reserved
+          ©<span id="yearHome"></span> • <span id="brand-copy-name"></span> • All Rights Reserved
         </p>
 
       </div>
@@ -392,10 +373,13 @@
   <!-- PapaParse for CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
+  <!-- Config inputs (sheet + brand) -->
+  <script src="./assets/js/inputs.js"></script>
+
   <!-- Core site scripts and features -->
   <script src="./assets/js/store.js"></script>
 
-  <!-- CSV-driven renderers for Footcap sections -->
+  <!-- CSV-driven renderers for sections -->
   <script src="./assets/js/csv-render.js"></script>
 
   <!-- Footcap template script -->

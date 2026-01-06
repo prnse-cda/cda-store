@@ -1658,17 +1658,22 @@
     }
     message += `\n${city} - ${pincode}\n`;
     
-    // Get WhatsApp number from footer
+    // Get WhatsApp number from footer (no hardcoded default)
     const footerPhoneLink = document.getElementById('footer-phone');
-    let phone = '917907555924'; // Default number
-    
+    let phone = '';
+
     if (footerPhoneLink && footerPhoneLink.href.includes('wa.me')) {
       const match = footerPhoneLink.href.match(/wa\.me\/(\d+)/);
       if (match) {
         phone = match[1];
       }
     }
-    
+
+    if (!phone) {
+      alert('WhatsApp contact not available. Please try again later.');
+      return;
+    }
+
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank', 'noopener');
     

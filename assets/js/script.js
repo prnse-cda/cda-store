@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function(){
   function handleHashNavigation() {
     const hash = window.location.hash;
     
-    if (!hash || hash === '#' || hash === '#hero-section') {
+    if (!hash || hash === '#') {
       // Home - scroll to top
       window.scrollTo({top: 0, behavior: 'smooth'});
       return;
@@ -131,6 +131,17 @@ document.addEventListener('DOMContentLoaded', function(){
   if (window.location.hash) {
     handleHashNavigation();
   }
+
+  // Apply brand name from inputs.js to header and footer
+  var brandName = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name : '';
+  try {
+    var brandEl = document.querySelector('.navbar-brand-text');
+    if (brandEl && brandName) brandEl.textContent = brandName;
+    var footerStrong = document.querySelector('.footer-brand strong');
+    if (footerStrong && brandName) footerStrong.textContent = brandName + '™';
+    var copyElName = document.getElementById('brand-copy-name');
+    if (copyElName && brandName) copyElName.textContent = brandName;
+  } catch (_) {}
   
   // Update navbar link behavior to close mobile menu (except SHOP dropdown)
   var navbarLinks = document.querySelectorAll('.navbar-link');
@@ -237,6 +248,28 @@ function openPolicyOverlay(policyType) {
             backButton.parentElement.remove();
           }
           content.innerHTML = clonedSection.innerHTML;
+          // Replace hardcoded brand name with configured brand_name
+          try {
+            var bName = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name : '';
+            if (bName) {
+              content.innerHTML = content.innerHTML.replace(/Cathy[’']s\s+Dreamy\s+Attire(?:™)?/g, bName + '™');
+            }
+          } catch(_) {}
+          // Replace hardcoded contacts with dynamic ones from footer sheet
+          var contacts = window.CDA_CONTACTS || null;
+          if (contacts) {
+            var strongs = content.querySelectorAll('strong');
+            strongs.forEach(function(s){
+              var txt = (s.textContent || '').trim();
+              if (txt.includes('@') && contacts.email) {
+                s.textContent = contacts.email;
+              } else if (/[0-9]{8,}/.test(txt) && contacts.whatsapp) {
+                var disp = contacts.whatsapp;
+                if (disp.startsWith('91') && disp.length > 10) disp = disp.substring(disp.length - 10);
+                s.textContent = '+91 ' + disp;
+              }
+            });
+          }
         } else {
           content.innerHTML = '<div style="padding: 40px;"><h2>Content not found</h2></div>';
         }
