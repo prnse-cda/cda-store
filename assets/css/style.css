@@ -897,70 +897,8 @@ body {
   pointer-events: all;
 }
 
-/*-----------------------------------*\
- * #HERO
-\*-----------------------------------*/
 
-.hero {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: left;
-  min-height: 400px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.hero-title { margin-bottom: 10px; }
-
-.hero-title > strong { display: block; }
-
-.hero-text {
-  color: var(--onyx);
-  font-family: var(--ff-roboto);
-  font-size: var(--fs-8);
-  line-height: 1.8;
-  max-width: 46ch;
-  margin-bottom: 25px;
-}
-
-
-
-
-
-/*-----------------------------------*\
- * #COLLECTION
-\*-----------------------------------*/
-
-.collection .section-title {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.collection-card {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  height: 400px;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding-block: 45px 25px;
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.collection-card .card-title {
-  color: var(--white);
-  background: rgba(0,0,0,0.35);
-  padding: 10px 14px;
-  border-radius: 10px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-}
+/* Collection card styles removed (section no longer present) */
 
 .btn-secondary {
   background-color: #fff;
@@ -1489,15 +1427,6 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
   .has-scrollbar > li { min-width: calc(50% - 12.5px); }
 
 
-
-  /**
-   * HERO
-   */
-
-  .hero-text { font-size: var(--fs-7); }
-
-
-
   /**
    * PRODUCTS
    */
@@ -1933,61 +1862,7 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
 }
 */
 
-/* Mobile socials at bottom of navbar */
-.mobile-socials { 
-  display: none;
-}
-
-@media (max-width: 991px) {
-  .mobile-socials { 
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 32px !important;
-    padding: 20px 30px !important;
-    border-top: 1px solid var(--gainsboro) !important;
-    justify-content: center !important;
-    align-items: center !important;
-    position: sticky !important;
-    bottom: 0 !important;
-    background: var(--white) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    text-align: center !important;
-  }
-  
-  .mobile-socials > * {
-    display: inline-block !important;
-    margin: 0 !important;
-    flex: 0 0 auto !important;
-  }
-  
-  .mobile-socials a,
-  .mobile-socials .social-link { 
-    width: 48px;
-    height: 48px;
-    font-size: 24px;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--cultured);
-    color: var(--rich-black-fogra-29);
-    transition: var(--transition-1);
-    flex-shrink: 0;
-  }
-  
-  .mobile-socials a:hover,
-  .mobile-socials .social-link:hover {
-    background: var(--bittersweet);
-    color: var(--white);
-  }
-  
-  .mobile-socials ion-icon {
-    font-size: 24px;
-    display: block;
-  }
-}
+/* Mobile socials block removed: using #navbar-social-links for unified handling */
 
   .navbar-link {
     font-family: var(--ff-roboto);
@@ -2005,16 +1880,6 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
     top: 5px;
     right: -12px;
   }
-
-
-
-  /**
-   * HERO
-   */
-
-  .hero { height: 480px; }
-
-
 
   /**
    * PRODUCTS
@@ -2072,23 +1937,6 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
    */
 
   .container { max-width: 1280px; }
-
-
-
-  /**
-   * HERO
-   */
-
-  .hero { height: 580px; }
-
-  .hero .container { max-width: 1000px; }
-
-  .hero-text {
-    font-size: var(--fs-6);
-    max-width: 50ch;
-  }
-
-
 
   /**
    * PRODUCTS

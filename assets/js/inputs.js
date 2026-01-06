@@ -16,7 +16,6 @@
   // Derived CSV config used by renderers; keep as gid tokens to leverage CDA_PUB_BASE
   var INP = window.CDA_INPUTS;
   window.CDA_CSV_CONFIG = {
-    // hero removed
     collections: INP.collections_gid,
     insta: (INP.insta_links_gid || INP.insta_liks_gid),
     footer: INP.contacts_gid

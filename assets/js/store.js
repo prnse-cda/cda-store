@@ -1,9 +1,13 @@
 // store.js - Product detail modal and cart management
+// Responsibilities:
+// - Maintain product registry from CSV rows (via window.cdRegisterProduct)
+// - Render and manage a product detail modal with size selection and share
+// - Provide a lightweight cart (add/remove/clear, badge, overlay) and WhatsApp checkout
 (() => {
   let PRODUCTS = {};
   let cart = [];
 
-  // Register products from CSV
+  /** Register product objects as they are parsed from CSV */
   window.cdRegisterProduct = function(product) {
     if (product && product.id) {
       PRODUCTS[product.id] = product;
@@ -38,7 +42,7 @@
     });
   }
 
-  // Create Flipkart-style product detail modal
+  /** Create the product detail modal structure and styles */
   function createProductModal() {
     const modalHTML = `
       <div id="product-detail-modal" class="product-modal-overlay" style="display:none;">
@@ -587,7 +591,7 @@
     document.head.insertAdjacentHTML('beforeend', styles);
   }
 
-  // Open product detail modal
+  /** Open product detail modal for a given product id; optionally preselect a size */
   window.openProductDetail = function(productId, preselectedSize) {
     const product = PRODUCTS[productId];
     if (!product) return;
@@ -1621,7 +1625,7 @@
     };
   }
 
-  // WhatsApp Checkout
+  /** Build a WhatsApp message from cart + customer details and open chat */
   function checkoutViaWhatsApp() {
     if (cart.length === 0) {
       alert('Cart is empty');
@@ -1720,12 +1724,5 @@
     handleSharedProductURL();
   }
 
-  // Gallery overlay (existing functionality)
-  window.openGalleryOverlay = function(images) {
-    console.log('Gallery:', images);
-    // Simple implementation - just show first image in modal
-    if (images && images.length > 0) {
-      window.open(images[0], '_blank');
-    }
-  };
+  // Removed unused openGalleryOverlay helper (not used in current site)
 })();

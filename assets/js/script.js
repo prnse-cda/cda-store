@@ -1,5 +1,14 @@
 'use strict';
 
+/**
+ * Core UI interactions and navigation:
+ * - Navbar open/close and scroll header state
+ * - SHOP dropdown behavior on mobile/desktop
+ * - URL hash navigation for products, collections, filters
+ * - Policy overlay loader (shipping/refund/privacy) with dynamic contacts
+ * - Footer contact scroll, year updates, and brand name injection
+ */
+
 
 
 /**
@@ -65,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function(){
   /**
    * URL Hash Navigation System
    */
+  /** Handle URL hash changes for deep-link navigation */
   function handleHashNavigation() {
     const hash = window.location.hash;
     
@@ -218,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function(){
 /**
  * Policy overlay functions
  */
+/** Open a modal and load the requested policy HTML into it */
 function openPolicyOverlay(policyType) {
   var overlay = document.getElementById('policy-modal');
   var content = document.getElementById('policy-content');
@@ -289,6 +300,7 @@ function openPolicyOverlay(policyType) {
   }
 }
 
+/** Close the policy modal and clear its content */
 function closePolicyOverlay() {
   var overlay = document.getElementById('policy-modal');
   overlay.classList.remove('active');

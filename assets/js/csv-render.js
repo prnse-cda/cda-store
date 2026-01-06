@@ -1,11 +1,17 @@
 (function(){
-  // CSV-driven rendering for sections: COLLECTIONS, PRODUCTS, INSTA, FOOTER
-  // Configure via window.CDA_CSV_CONFIG and window.CDA_PUB_BASE (from inputs.js)
+  /**
+   * CSV-driven rendering for sections: Collections (filters + products), Instagram, Footer
+   * Configuration is provided via window.CDA_CSV_CONFIG and window.CDA_PUB_BASE (set in inputs.js)
+   * - Collections sheet: rows with collection_name and comma-separated collection_sheet_gid values
+   * - Product sheets: expect `sku` as product ID and standard attributes (price, offer_price, sizes, images...)
+   * - Footer sheet: contact details (email, whatsapp, instagram, facebook, pinterest)
+   */
 
   var CFG = window.CDA_CSV_CONFIG || {};
   var SHEET_ID = window.CDA_SHEET_ID || null; // optional, used when a row provides only csv_gid
   var PUB_BASE = window.CDA_PUB_BASE || null; // published /d/e/... base ending with &gid=
 
+  /** Resolve a Google Sheet URL or gid to a published CSV URL */
   function toPublishedCsv(urlOrGid){
     if (!urlOrGid) return null;
     var s = String(urlOrGid).trim();
@@ -25,6 +31,7 @@
   }
 
   // Minimal CSV loader using PapaParse
+  /** Load CSV via PapaParse (header=true), callbacks with array of row objects */
   function loadCsv(url, cb){
     if (!url) return cb([]);
     if (typeof Papa === 'undefined') { console.error('PapaParse missing'); cb([]); return; }
@@ -32,6 +39,7 @@
   }
 
   // Google Drive helpers
+  /** Extract a Google Drive file id from a token (id or URL) */
   function extractDriveId(token){
     if (!token) return null;
     var s = String(token).trim();
@@ -48,7 +56,9 @@
     var m2 = s.match(/([a-zA-Z0-9_-]{20,})/);
     return m2 ? m2[1] : null;
   }
+  /** Build Google Drive thumbnail URL for a given id */
   function driveThumb(id, size){ size = size || 1000; return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w' + size; }
+  /** Convert a comma-separated token string into image URLs, resolving Drive IDs */
   function tokenToImgs(token){
     if (!token) return [];
     return String(token).split(',').map(function(p){ return p.trim(); }).filter(Boolean).map(function(p){
@@ -57,20 +67,19 @@
     });
   }
 
-  // HERO removed
-
   // COLLECTIONS + FILTERS + PRODUCTS (lazy)
   var collections = [];
   var collectionGroups = {}; // title (collection_name) -> array of collection rows
   var productCache = {}; // product_name -> array of products
   var groupCache = {}; // group title -> merged array of products
-  var PREVIEW_RENDERED = false;
+  // Initial preview mode renders one product per collection with a View All button
 
   function hideViewAll(){
     var c = document.getElementById('view-all-container');
     if (c) c.remove();
   }
 
+  /** Append a "View All" button under the product list that loads full products */
   function showViewAll(){
     var plist = document.getElementById('product-list');
     if (!plist) return;
@@ -92,6 +101,7 @@
     if (parent) parent.appendChild(container);
   }
 
+  /** Render the first product from each collection as a lightweight preview */
   function renderInitialPreview(){
     var plist = document.getElementById('product-list');
     if (!plist) return;
@@ -118,8 +128,8 @@
     });
   }
 
+  /** Fetch collections, build filters and shop menu, render optional collection cards */
   function renderCollections(){
-    var list = document.getElementById('collection-list');
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
     if (!CFG.collections || !filters || !plist) return;
@@ -150,31 +160,7 @@
       // Render Shop submenu from groups
       renderShopMenu();
 
-      // Cards - optional; render only if a collections list exists in DOM
-      if (list) {
-        list.innerHTML = '';
-        var renderedCollections = {};
-        collections.forEach(function(c){
-          var collectionKey = c.title || c.name;
-          if (renderedCollections[collectionKey]) return;
-          renderedCollections[collectionKey] = true;
-          var bg = '';
-          var li = document.createElement('li');
-          li.innerHTML = '<div class="collection-card" style="background-image:url(\''+ (bg || './assets/images/collection-1.jpg') +'\')">\
-            <h3 class="h4 card-title>'+ (c.title || c.name) +'</h3>\
-            <a href="#" class="btn btn-secondary"><span>Explore All</span><ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a>\
-          </div>';
-          var a = li.querySelector('a');
-          a.addEventListener('click', function(ev){ 
-            ev.preventDefault(); 
-            var collectionName = c.title || c.name;
-            history.pushState(null, '', '#collection=' + encodeURIComponent(collectionName));
-            selectGroup(collectionName); 
-            document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'}); 
-          });
-          list.appendChild(li);
-        });
-      }
+      // Collections cards removed from site; using filters + products only
 
       // Filters - deduplicate by product_name
       filters.innerHTML = '';
@@ -207,6 +193,7 @@
   }
 
   // Build SHOP dropdown menu from collection groups
+  /** Build SHOP dropdown menu from unique collection names */
   function renderShopMenu(){
     var menu = document.getElementById('shop-submenu');
     if (!menu) return;
@@ -239,6 +226,7 @@
     Object.keys(collectionGroups).forEach(function(title){ makeItem(title, function(){ selectGroup(title); }); });
   }
 
+  /** Get the published CSV URL for a collection entry */
   function collectionCsvUrl(c){
     if (c.csv_url) return toPublishedCsv(c.csv_url);
     if (c.csv_gid) return toPublishedCsv(c.csv_gid);
@@ -246,6 +234,7 @@
   }
 
   // Select a group by collection_name/title and merge all product sheets for that group
+  /** Select a collection group by name and merge products across its sheets */
   function selectGroup(groupTitle){
     var plist = document.getElementById('product-list');
     if (!plist) return;
@@ -271,6 +260,7 @@
   // Expose globally for URL navigation
   window.selectGroup = selectGroup;
 
+  /** Map CSV rows to product objects; prefer `sku` as id */
   function parseProducts(rows, collectionName){
     return rows.map(function(r, idx){
       var id = (r.sku || r.SKU || r.sku_id || r.id || r.ID || r.Id || String(idx+1)).toString().trim();
@@ -296,6 +286,7 @@
     var v = Number(String(n).replace(/[^0-9.-]+/g,'')) || 0; return '₹' + v.toFixed(2);
   }
 
+  /** Render a list of product cards into the product grid */
   function renderProducts(list){
     var root = document.getElementById('product-list');
     if (!root) return;
@@ -348,6 +339,7 @@
     });
   }
 
+  /** Select filter by collection name or All; lazy-load product sheets and merge */
   function selectFilter(label){
     hideViewAll();
     var filters = document.getElementById('filter-list');
@@ -395,6 +387,7 @@
   window.selectFilter = selectFilter;
 
   // INSTA
+  /** Render Instagram cards from the insta sheet */
   function renderInsta(){
     var list = document.getElementById('insta-list');
     if (!list || !CFG.insta) return;
@@ -424,6 +417,7 @@
   }
 
   // FOOTER
+  /** Render footer contacts (email, WhatsApp) and social links; expose window.CDA_CONTACTS */
   function renderFooter(){
     if (!CFG.footer) return;
     loadCsv(CFG.footer, function(rows){
@@ -449,22 +443,7 @@
           li.innerHTML = '<a href="'+ item.href +'" class="social-link" target="_blank" rel="noopener"><ion-icon name="'+ item.icon +'"></ion-icon></a>';
           social.appendChild(li);
         });
-        // Mobile navbar socials
-        var mSocial = document.getElementById('mobile-socials');
-        if (mSocial) {
-          mSocial.innerHTML = '';
-          socialLinks.forEach(function(item){
-            if (!item.href) return;
-            var a = document.createElement('a');
-            a.href = item.href; a.target = '_blank'; a.rel = 'noopener'; a.className = 'social-link';
-            a.innerHTML = '<ion-icon name="'+ item.icon +'"></ion-icon>';
-            a.addEventListener('click', function(){
-              document.querySelector('[data-navbar]')?.classList.remove('active');
-              document.querySelector('[data-overlay]')?.classList.remove('active');
-            });
-            mSocial.appendChild(a);
-          });
-        }
+        // Note: Mobile socials block removed; navbar-social-links is used instead
         // Navbar social links (new style with borders)
         var navSocial = document.getElementById('navbar-social-links');
         if (navSocial) {
