@@ -323,8 +323,8 @@ body {
 }
 
 .btn-secondary {
-  background-color: #fff;
-  color: #3c4043;
+  background-color: var(--white);
+  color: var(--rich-black-fogra-29);
 }
 
 .btn-secondary:is(:hover, :focus) {
@@ -896,22 +896,7 @@ body {
   opacity: 1;
   pointer-events: all;
 }
-
-
 /* Collection card styles removed (section no longer present) */
-
-.btn-secondary {
-  background-color: #fff;
-  color: #3c4043;
-}
-
-.btn-secondary:is(:hover, :focus) {
-  background: #F6F9FE;
-  color: #174ea6;
-}
-
-
-
 
 /*-----------------------------------*\
  * #PRODUCTS
@@ -1312,31 +1297,7 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
 
 .table-data { color: var(--onyx); }
 
-.newsletter-text {
-  color: var(--onyx);
-  line-height: 1.7;
-  margin-bottom: 20px;
-}
-
-.newsletter-form { position: relative; }
-
-.newsletter-input {
-  background: var(--white);
-  color: var(--onyx);
-  padding: 15px 25px;
-  padding-right: 120px;
-}
-
-.newsletter-form .btn-primary {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  font-family: var(--ff-josefin-sans);
-  font-size: var(--fs-6);
-  font-weight: var(--fw-600);
-  padding-inline: 20px;
-}
+/* Newsletter styles removed (newsletter section not used) */
 
 .footer-bottom {
   background: var(--rich-black-fogra-29);
@@ -1750,117 +1711,7 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
   padding-left: 20px;
 }
 
-/* OLD CODE - TO BE DELETED LATER
-.dropdown-menu .dropdown-item:hover::before,
-.dropdown-menu .dropdown-item:focus::before {
-  transform: scaleY(1);
-}
-
-.dropdown-menu .dropdown-item:active {
-  background-color: rgba(255, 99, 71, 0.15);
-}
-*/
-
-/* OLD CODE - TO BE DELETED LATER
-/* Dropdown toggle arrow */
-.dropdown-toggle::after {
-  margin-left: 6px;
-  vertical-align: middle;
-}
-*/
-
-/* OLD CODE - TO BE DELETED LATER
-/* Desktop: dropend (dropright) positioning */
-@media (min-width: 992px) {
-  .navbar .dropend .dropdown-menu {
-    left: 100%;
-    top: -8px;
-    margin-left: 8px;
-  }
-  
-  .navbar .dropend .dropdown-toggle::after {
-    display: inline-block;
-    margin-left: .255em;
-    vertical-align: .255em;
-    content: "";
-    border-top: .3em solid transparent;
-    border-right: 0;
-    border-bottom: .3em solid transparent;
-    border-left: .3em solid;
-  }
-}
-*/
-
-/* OLD CODE - TO BE DELETED LATER
-/* Mobile: collapse styling */
-@media (max-width: 991px) {
-  .dropdown-menu {
-    display: none !important;
-  }
-  
-  /* Mobile collapse styling */
-  .navbar-collapse-menu {
-    background: rgba(255, 99, 71, 0.03);
-    border-left: 2px solid var(--bittersweet);
-    margin: 0;
-    padding: 0;
-  }
-  
-  .collapse-submenu a {
-    padding: 14px 20px 14px 40px;
-    font-size: 1.6rem;
-    font-family: var(--ff-josefin-sans);
-    font-weight: var(--fw-500);
-    color: var(--rich-black-fogra-29);
-    letter-spacing: 0.5px;
-    text-transform: capitalize;
-  }
-  
-  .navbar .dropdown-menu-old {
-    position: static !important;
-    transform: none !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 99, 71, 0.15);
-    border-left: 3px solid var(--bittersweet);
-    padding: 8px;
-    background: linear-gradient(to right, rgba(255, 99, 71, 0.02), rgba(255, 255, 255, 0.98));
-    border-radius: 12px;
-    margin: 12px 0;
-  }
-  
-  .navbar .dropdown-menu .dropdown-item {
-    padding: 12px 14px;
-    font-size: 1.5rem;
-    font-weight: var(--fw-400);
-    color: var(--rich-black-fogra-29);
-    letter-spacing: 0.3px;
-    text-transform: capitalize;
-    border: none;
-    border-radius: 8px;
-    margin: 3px 0;
-    transition: all 0.2s ease;
-    position: relative;
-  }
-  
-  .navbar .dropdown-menu .dropdown-item:hover,
-  .navbar .dropdown-menu .dropdown-item:focus {
-    background: rgba(255, 99, 71, 0.12);
-    color: var(--bittersweet);
-    transform: translateX(6px);
-    padding-left: 18px;
-    box-shadow: 0 2px 8px rgba(255, 99, 71, 0.1);
-  }
-  
-  .navbar .dropdown-menu .dropdown-item::before {
-    display: none;
-  }
-  
-  .navbar .dropend .dropdown-toggle::after {
-    float: right;
-    margin-top: 8px;
-  }
-}
-*/
+/* Legacy dropdown/old mobile collapse code removed */
 
 /* Mobile socials block removed: using #navbar-social-links for unified handling */
 
@@ -1946,15 +1797,7 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
 
 
 
-  /**
-   * SPECIAL
-   */
-
-  .special-banner { min-width: calc(25% - 25px); }
-
-  .special-product .has-scrollbar > li { min-width: calc(33.33% - 16.66px); }
-
-  .special-banner .banner-title { --fs-4: 2.4rem; }
+  /* SPECIAL section removed (not in use) */
 
 
 
