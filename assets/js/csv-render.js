@@ -69,7 +69,7 @@
     var list = document.getElementById('collection-list');
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
-    if (!CFG.collections || !list || !filters || !plist) return;
+    if (!CFG.collections || !filters || !plist) return;
     loadCsv(CFG.collections, function(rows){
       // New schema: collection_name, collection_sheet_gid (comma-separated gid values)
       collections = rows.map(function(r){
@@ -97,30 +97,31 @@
       // Render Shop submenu from groups
       renderShopMenu();
 
-      // Cards - render only one card per unique collection_name (no image in new schema)
-      list.innerHTML = '';
-      var renderedCollections = {};
-      collections.forEach(function(c){
-        var collectionKey = c.title || c.name;
-        // Skip if we already rendered this collection
-        if (renderedCollections[collectionKey]) return;
-        renderedCollections[collectionKey] = true;
-        var bg = '';
-        var li = document.createElement('li');
-        li.innerHTML = '<div class="collection-card" style="background-image:url(\''+ (bg || './assets/images/collection-1.jpg') +'\')">\
-          <h3 class="h4 card-title">'+ (c.title || c.name) +'</h3>\
-          <a href="#" class="btn btn-secondary"><span>Explore All</span><ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a>\
-        </div>';
-        var a = li.querySelector('a');
-        a.addEventListener('click', function(ev){ 
-          ev.preventDefault(); 
-          var collectionName = c.title || c.name;
-          history.pushState(null, '', '#collection=' + encodeURIComponent(collectionName));
-          selectGroup(collectionName); 
-          document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'}); 
+      // Cards - optional; render only if a collections list exists in DOM
+      if (list) {
+        list.innerHTML = '';
+        var renderedCollections = {};
+        collections.forEach(function(c){
+          var collectionKey = c.title || c.name;
+          if (renderedCollections[collectionKey]) return;
+          renderedCollections[collectionKey] = true;
+          var bg = '';
+          var li = document.createElement('li');
+          li.innerHTML = '<div class="collection-card" style="background-image:url(\''+ (bg || './assets/images/collection-1.jpg') +'\')">\
+            <h3 class="h4 card-title>'+ (c.title || c.name) +'</h3>\
+            <a href="#" class="btn btn-secondary"><span>Explore All</span><ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon></a>\
+          </div>';
+          var a = li.querySelector('a');
+          a.addEventListener('click', function(ev){ 
+            ev.preventDefault(); 
+            var collectionName = c.title || c.name;
+            history.pushState(null, '', '#collection=' + encodeURIComponent(collectionName));
+            selectGroup(collectionName); 
+            document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'}); 
+          });
+          list.appendChild(li);
         });
-        list.appendChild(li);
-      });
+      }
 
       // Filters - deduplicate by product_name
       filters.innerHTML = '';
