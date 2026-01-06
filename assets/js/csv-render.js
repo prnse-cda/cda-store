@@ -132,7 +132,7 @@
   function renderCollections(){
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
-    if (!CFG.collections || !filters || !plist) return;
+    if (!CFG.collections) return;
     loadCsv(CFG.collections, function(rows){
       // New schema: collection_name, collection_sheet_gid (comma-separated gid values)
       collections = rows.map(function(r){
@@ -157,37 +157,41 @@
         collectionGroups[key].push(c);
       });
 
-      // Render Shop submenu from groups
+      // Render Shop submenu from groups (available across pages)
       renderShopMenu();
 
       // Collections cards removed from site; using filters + products only
 
-      // Filters - deduplicate by product_name
-      filters.innerHTML = '';
-      var makeBtn = function(label){
-        var li = document.createElement('li');
-        var b = document.createElement('button'); b.className = 'filter-btn'; b.textContent = label; li.appendChild(b);
-        b.addEventListener('click', function(){ 
-          history.pushState(null, '', '#filter=' + encodeURIComponent(label));
-          selectFilter(label); 
+      // Filters - deduplicate by product_name (only render when filter-list exists)
+      if (filters) {
+        filters.innerHTML = '';
+        var makeBtn = function(label){
+          var li = document.createElement('li');
+          var b = document.createElement('button'); b.className = 'filter-btn'; b.textContent = label; li.appendChild(b);
+          b.addEventListener('click', function(){ 
+            history.pushState(null, '', '#filter=' + encodeURIComponent(label));
+            selectFilter(label); 
+          });
+          filters.appendChild(li);
+        };
+        makeBtn('All');
+        var uniqueProductNames = {};
+        collections.forEach(function(c){ 
+          if (!uniqueProductNames[c.name]) {
+            uniqueProductNames[c.name] = true;
+            makeBtn(c.name); 
+          }
         });
-        filters.appendChild(li);
-      };
-      makeBtn('All');
-      var uniqueProductNames = {};
-      collections.forEach(function(c){ 
-        if (!uniqueProductNames[c.name]) {
-          uniqueProductNames[c.name] = true;
-          makeBtn(c.name); 
-        }
-      });
+      }
 
       // On first load without a hash, show one product per collection with a View All button
-      var h = window.location.hash || '';
-      if (/^#(filter|collection|product)=/i.test(h)) {
-        // Let navigation handler trigger loads
-      } else {
-        renderInitialPreview();
+      if (filters && plist) {
+        var h = window.location.hash || '';
+        if (/^#(filter|collection|product)=/i.test(h)) {
+          // Let navigation handler trigger loads
+        } else {
+          renderInitialPreview();
+        }
       }
     });
   }
@@ -206,17 +210,25 @@
       a.textContent = label;
       a.addEventListener('click', function(e){ 
         e.preventDefault();
-        // Update URL based on filter type
+        var hasProduct = document.getElementById('product-section');
+        var inPolicies = window.location.pathname.indexOf('/policies/') !== -1;
+        var base = inPolicies ? '../' : './';
+        if (!hasProduct) {
+          // Navigate to index with hash where products are rendered
+          var hash = (label === 'All') ? '#filter=All' : ('#collection=' + encodeURIComponent(label));
+          window.location.href = base + hash;
+          return;
+        }
+        // Update URL and render locally
         if (label === 'All') {
           history.pushState(null, '', '#filter=All');
         } else {
           history.pushState(null, '', '#collection=' + encodeURIComponent(label));
         }
-        onClick(); 
-        document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'}); 
-        document.querySelector('[data-navbar]')?.classList.remove('active'); 
+        onClick();
+        document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'});
+        document.querySelector('[data-navbar]')?.classList.remove('active');
         document.querySelector('[data-overlay]')?.classList.remove('active');
-        // Close dropdown (desktop and mobile)
         document.querySelector('.navbar-item.has-dropdown')?.classList.remove('active');
       });
       li.appendChild(a);

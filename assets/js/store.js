@@ -1451,16 +1451,21 @@
     
     cart.forEach((item, idx) => {
       const product = PRODUCTS[item.id];
-      if (!product) return;
-      
-      const sizes = (product.sizes || '').split(',').map(s => s.trim()).filter(Boolean);
+      // Fallback: if product registry not available (e.g., policy pages), render without sizes
+      const sizes = product ? (String(product.sizes || '').split(',').map(s => s.trim()).filter(Boolean)) : [];
       
       const itemEl = document.createElement('div');
       itemEl.className = 'cart-item';
+      // Build product link to index page with hash
+      const inPolicies = window.location.pathname.indexOf('/policies/') !== -1;
+      const base = inPolicies ? '../' : './';
+      const sizeParam = item.size ? ('&size=' + encodeURIComponent(item.size)) : '';
+      const productLink = base + '#product=' + encodeURIComponent(item.id) + sizeParam;
+
       itemEl.innerHTML = `
         <div class="cart-item-thumb"><img src="${item.image}" alt="${item.name}" /></div>
         <div class="cart-item-details">
-          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-name"><a class="cart-item-link" href="${productLink}">${item.name}</a></div>
           <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
           <div class="cart-item-controls">
             ${sizes.length ? `
@@ -1531,6 +1536,18 @@
         updateCartBadge();
       });
     });
+
+    // Close cart modal when clicking product links
+    if (!itemsList.dataset.linkHandler) {
+      itemsList.addEventListener('click', (e) => {
+        const link = e.target.closest('.cart-item-link');
+        if (link) {
+          const overlay = document.getElementById('cart-modal-overlay');
+          if (overlay) overlay.style.display = 'none';
+        }
+      });
+      itemsList.dataset.linkHandler = '1';
+    }
     
     // Calculate total
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
