@@ -1311,7 +1311,8 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .copyright-link {
