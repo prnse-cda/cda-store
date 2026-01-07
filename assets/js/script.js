@@ -151,6 +151,10 @@ document.addEventListener('DOMContentLoaded', function(){
     if (footerStrong && brandName) footerStrong.textContent = brandName + '™';
     var copyElName = document.getElementById('brand-copy-name');
     if (copyElName && brandName) copyElName.textContent = brandName;
+    var brandStrongGeneric = document.getElementById('brand-name-strong');
+    if (brandStrongGeneric && brandName) brandStrongGeneric.textContent = brandName + '™';
+    // Fill all policy/brand placeholders used on policy pages
+    document.querySelectorAll('.policy-brand-name, .brand-name-strong, .footer-brand-name').forEach(function(el){ el.textContent = brandName + '™'; });
   } catch (_) {}
   
   // Update navbar link behavior to close mobile menu (except SHOP dropdown)
@@ -218,10 +222,33 @@ document.addEventListener('DOMContentLoaded', function(){
   /**
    * Auto-update year
    */
+  var currentYear = new Date().getFullYear();
   var yearHome = document.getElementById('yearHome');
-  if (yearHome) {
-    yearHome.textContent = new Date().getFullYear();
-  }
+  if (yearHome) yearHome.textContent = currentYear;
+  // Update any inline policy years (class-based, to avoid duplicate ids)
+  document.querySelectorAll('.policy-effective-year').forEach(function(el){ el.textContent = currentYear; });
+  // Populate all dynamic brand strong placeholders on policy pages
+  try {
+    var brand = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name + '™' : '';
+    document.querySelectorAll('.brand-name-strong').forEach(function(el){ el.textContent = brand; });
+    document.querySelectorAll('.policy-brand-name').forEach(function(el){ el.textContent = brand; });
+    document.querySelectorAll('.footer-brand-name').forEach(function(el){ el.textContent = brand; });
+  } catch(_) {}
+
+  // If policy content placeholders for contacts exist, populate from footer CSV when available
+  (function fillPolicyContactsWithRetry(attempt){
+    attempt = attempt || 0;
+    var contacts = window.CDA_CONTACTS || null;
+    if (contacts) {
+      var pe = document.getElementById('policy-email'); if (pe && contacts.email) pe.textContent = contacts.email;
+      var pw = document.getElementById('policy-whatsapp'); if (pw && contacts.whatsapp) {
+        var disp = contacts.whatsapp; if (disp.startsWith('91') && disp.length > 10) disp = disp.substring(disp.length - 10);
+        pw.textContent = '+91 ' + disp;
+      }
+      return;
+    }
+    if (attempt < 50) setTimeout(function(){ fillPolicyContactsWithRetry(attempt+1); }, 100);
+  })();
   var yearElements = document.querySelectorAll('#year');
   yearElements.forEach(function(el) {
     el.textContent = new Date().getFullYear();
