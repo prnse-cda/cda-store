@@ -278,7 +278,7 @@
       var id = (r.sku || r.SKU || r.sku_id || r.id || r.ID || r.Id || String(idx+1)).toString().trim();
       return {
         id: id,
-        name: collectionName || (r.name || r.Name || r.product || '').toString().trim(),
+        name: (r.name || r.Name || r.product || collectionName || '').toString().trim(),
         price: (r.price || r.Price || '0').toString().trim(),
         offer_price: (r.offer_price || r.offerPrice || r['offer price'] || '').toString().trim(),
         sizes: (r.sizes || r.size || '').toString().trim(),
