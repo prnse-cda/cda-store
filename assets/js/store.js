@@ -92,6 +92,9 @@
                 <a href="#" class="helper-link" id="insta-link" style="display:none;" target="_blank" rel="noopener">
                   <i class="fab fa-instagram"></i> View on Instagram
                 </a>
+                <a href="#" class="helper-link" id="fabric-link" style="display:none;">
+                  <i class="fas fa-link"></i> View this Fabric
+                </a>
               </div>
             </div>
           </div>
@@ -763,6 +766,15 @@
       instaLink.style.display = 'inline-flex';
     } else {
       instaLink.style.display = 'none';
+    }
+
+    // Fabric product link
+    const fabricLink = document.getElementById('fabric-link');
+    if (product.fabric_product_id && product.fabric_product_id.trim() !== '') {
+      fabricLink.href = '#product=' + product.fabric_product_id;
+      fabricLink.style.display = 'inline-flex';
+    } else {
+      fabricLink.style.display = 'none';
     }
 
     // Size chart

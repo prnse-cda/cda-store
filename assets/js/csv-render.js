@@ -289,7 +289,8 @@
         priority_rank: Number(r.priority_rank || 0) || 0,
         card_badge: (r.card_badge || r.cardBadge || r['card badge'] || '').toString().trim(),
         sale_status: (r.sale_status || r.saleStatus || r['sale status'] || '').toString().trim(),
-        insta_link: (r.insta_link || r.instaLink || r['insta link'] || r.instagram_link || '').toString().trim()
+        insta_link: (r.insta_link || r.instaLink || r['insta link'] || r.instagram_link || '').toString().trim(),
+        fabric_product_id: (r.fabric_product_id || '').toString().trim()
       };
     });
   }
