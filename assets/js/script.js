@@ -249,6 +249,24 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     if (attempt < 50) setTimeout(function(){ fillPolicyContactsWithRetry(attempt+1); }, 100);
   })();
+
+  // Update document title on policy pages to use dynamic brand
+  try {
+    var path = window.location.pathname;
+    if (path.indexOf('/policies/') !== -1) {
+      var brandNameOnly = (window.CDA_INPUTS && window.CDA_INPUTS.brand_name) ? window.CDA_INPUTS.brand_name : '';
+      var h1 = document.querySelector('.policy-content h1');
+      var prefix = h1 ? (h1.textContent || '').trim() : '';
+      if (!prefix) {
+        if (path.indexOf('privacy') !== -1) prefix = 'Privacy Policy';
+        else if (path.indexOf('shipping') !== -1) prefix = 'Shipping Policy';
+        else if (path.indexOf('refund') !== -1) prefix = 'Return & Refund Policy';
+      }
+      if (prefix && brandNameOnly) {
+        document.title = prefix + ' • ' + brandNameOnly;
+      }
+    }
+  } catch(_) {}
   var yearElements = document.querySelectorAll('#year');
   yearElements.forEach(function(el) {
     el.textContent = new Date().getFullYear();
