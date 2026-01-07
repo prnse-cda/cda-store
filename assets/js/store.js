@@ -599,6 +599,17 @@
     const product = PRODUCTS[productId];
     if (!product) return;
 
+    // GA Event for Product View
+    if (typeof gtag === 'function') {
+      gtag('event', 'view_item', {
+        'items': [{
+          'item_id': product.id,
+          'item_name': product.name,
+          'item_category': product.category
+        }]
+      });
+    }
+
     // Create modal if it doesn't exist
     if (!document.getElementById('product-detail-modal')) {
       createProductModal();
@@ -1638,6 +1649,21 @@
 
   // Show cart modal
   window.cdShowCart = function() {
+    // GA Event for Cart View
+    if (typeof gtag === 'function') {
+      const items = cart.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        quantity: item.qty,
+        price: item.price
+      }));
+      gtag('event', 'view_cart', {
+        'currency': 'INR',
+        'value': cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+        'items': items
+      });
+    }
+
     if (!document.getElementById('cart-modal-overlay')) {
       createCartModal();
       attachCartEvents();
@@ -1711,11 +1737,26 @@
       window.showAlert('Please enter a valid 6-digit PIN code.', 'error');
       return;
     }
+
+    // GA Event for beginning checkout
+    if (typeof gtag === 'function') {
+      const items = cart.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        quantity: item.qty,
+        price: item.price
+      }));
+      gtag('event', 'begin_checkout', {
+        'currency': 'INR',
+        'value': cart.reduce((sum, item) => sum + (item.price * item.qty), 0),
+        'items': items
+      });
+    }
     
     // Build WhatsApp message
     let message = `Hello! I'd like to order the following items.\n\n`;
     cart.forEach(item => {
-      message += `${item.name} (${item.size || 'N/A'}) x ${item.qty}\n`;
+      message += `${item.id} (${item.size || 'N/A'}) x ${item.qty}\n`;
     });
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);

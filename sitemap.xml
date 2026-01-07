@@ -4,25 +4,20 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- 
-  IMPORTANT: You will need to find and replace all instances of 
-  "https://<your-github-username>.github.io/cda-store" 
-  with your actual website URL. 
--->
 <url>
-  <loc>https://<your-github-username>.github.io/cda-store/</loc>
+  <loc>https://cdastore.in/</loc>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://<your-github-username>.github.io/cda-store/policies/privacy-policy.html</loc>
+  <loc>https://cdastore.in/policies/privacy-policy.html</loc>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://<your-github-username>.github.io/cda-store/policies/refund-policy.html</loc>
+  <loc>https://cdastore.in/policies/refund-policy.html</loc>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://<your-github-username>.github.io/cda-store/policies/shipping-policy.html</loc>
+  <loc>https://cdastore.in/policies/shipping-policy.html</loc>
   <priority>0.80</priority>
 </url>
 </urlset>
