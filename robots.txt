@@ -1,0 +1,9 @@
+# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file.
+
+# Allow all ethical crawlers to access the site.
+User-agent: *
+Allow: /
+
+# Add a reference to the sitemap.
+# IMPORTANT: You will need to replace "https://<your-github-username>.github.io/cda-store" with your actual website URL.
+Sitemap: https://<your-github-username>.github.io/cda-store/sitemap.xml

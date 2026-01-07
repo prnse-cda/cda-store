@@ -813,7 +813,7 @@
         const waUrl = footerPhoneLink.href.replace(/\?text=[^&]*/, `?text=${message}`);
         window.open(waUrl, '_blank', 'noopener');
       } else {
-        alert('WhatsApp contact not available');
+        window.showAlert('WhatsApp contact not available', 'error');
       }
     };
 
@@ -831,7 +831,7 @@
   function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(() => {
-        alert('Product link copied to clipboard!');
+        window.showAlert('Product link copied to clipboard!', 'success');
       }).catch(() => {
         fallbackCopyTextToClipboard(text);
       });
@@ -850,9 +850,9 @@
     textArea.select();
     try {
       document.execCommand('copy');
-      alert('Product link copied to clipboard!');
+      window.showAlert('Product link copied to clipboard!', 'success');
     } catch (err) {
-      alert('Failed to copy link. Please copy manually: ' + text);
+      window.showAlert('Failed to copy link. Please copy manually: ' + text, 'error');
     }
     document.body.removeChild(textArea);
   }
@@ -1520,7 +1520,7 @@
       btn.addEventListener('click', (e) => {
         const idx = parseInt(e.target.getAttribute('data-idx'));
         if (cart[idx].qty >= MAX_QTY_PER_ITEM) {
-          alert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
+          window.showAlert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
           return;
         }
         cart[idx].qty += 1;
@@ -1583,6 +1583,13 @@
       navBadge.textContent = count;
       navBadge.style.display = count > 0 ? 'inline-block' : 'none';
     }
+
+    // Update mobile bottom nav cart badge
+    const mobileBadge = document.getElementById('mobileCartBadge');
+    if (mobileBadge) {
+      mobileBadge.textContent = count;
+      mobileBadge.style.display = count > 0 ? 'block' : 'none';
+    }
   }
 
   // Add to cart function
@@ -1606,7 +1613,7 @@
     const existing = cart.find(item => item.id === productId && (item.size || '') === (size || ''));
     if (existing) {
       if (existing.qty >= MAX_QTY_PER_ITEM) {
-        alert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
+        window.showAlert(`You can add up to ${MAX_QTY_PER_ITEM} per item.`);
       } else {
         existing.qty += 1;
       }
@@ -1662,12 +1669,12 @@
     
     if (clearBtn) {
       clearBtn.onclick = () => {
-        if (confirm('Clear your cart?')) {
+        window.showConfirm('Clear your cart?', () => {
           cart = [];
           saveCart();
           renderCart();
           updateCartBadge();
-        }
+        });
       };
     }
     
@@ -1685,7 +1692,7 @@
   /** Build a WhatsApp message from cart + customer details and open chat */
   function checkoutViaWhatsApp() {
     if (cart.length === 0) {
-      alert('Cart is empty');
+      window.showAlert('Cart is empty', 'error');
       return;
     }
     
@@ -1696,12 +1703,12 @@
     const pincode = document.getElementById('customer-pincode')?.value.trim();
     
     if (!name || !address || !city || !pincode) {
-      alert('Please fill in all customer details.');
+      window.showAlert('Please fill in all customer details.', 'error');
       return;
     }
     
     if (!/^[1-9][0-9]{5}$/.test(pincode)) {
-      alert('Please enter a valid 6-digit PIN code.');
+      window.showAlert('Please enter a valid 6-digit PIN code.', 'error');
       return;
     }
     
@@ -1731,7 +1738,7 @@
     }
 
     if (!phone) {
-      alert('WhatsApp contact not available. Please try again later.');
+      window.showAlert('WhatsApp contact not available. Please try again later.', 'error');
       return;
     }
 

@@ -1,6 +1,32 @@
 'use strict';
 
 /**
+ * Pre-loader handler
+ */
+window.pageLoader = {
+  tasks: 0,
+  init: function(taskCount) {
+    this.tasks = taskCount;
+  },
+  taskDone: function() {
+    this.tasks--;
+    if (this.tasks <= 0) {
+      this.hide();
+    }
+  },
+  hide: function() {
+    const preloader = document.querySelector('[data-preloader]');
+    if (preloader) {
+      preloader.classList.add('hidden');
+      // Optional: remove from DOM after transition
+      setTimeout(() => {
+        preloader.remove();
+      }, 1000);
+    }
+  }
+};
+
+/**
  * Core UI interactions and navigation:
  * - Navbar open/close and scroll header state
  * - SHOP dropdown behavior on mobile/desktop
@@ -70,6 +96,17 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   }
+
+  // Mobile bottom nav cart button
+  const mobileCartBtn = document.getElementById('mobile-cart-btn');
+  if (mobileCartBtn) {
+    mobileCartBtn.addEventListener('click', function() {
+      if (window.cdShowCart) {
+        window.cdShowCart();
+      }
+    });
+  }
+  
   
   /**
    * URL Hash Navigation System

@@ -1,0 +1,91 @@
+/* Custom Alert (Toast/Snackbar) Styles */
+
+.cda-alert-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10005; /* Higher than other modals */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.cda-alert {
+  background-color: var(--rich-black-fogra-29);
+  color: var(--white);
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateX(100%);
+  animation: slideIn 0.5s forwards, fadeOut 0.5s 4s forwards;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.cda-alert.success {
+  background-color: #28a745;
+}
+
+.cda-alert.error {
+  background-color: #dc3545;
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Custom Confirm Modal Styles */
+
+.cda-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10004; /* Below alerts, but above other content */
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cda-confirm {
+  background: var(--white);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.cda-confirm-message {
+  font-size: 1.8rem;
+  color: var(--rich-black-fogra-29);
+  margin-bottom: 25px;
+}
+
+.cda-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}

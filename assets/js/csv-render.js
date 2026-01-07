@@ -34,8 +34,23 @@
   /** Load CSV via PapaParse (header=true), callbacks with array of row objects */
   function loadCsv(url, cb){
     if (!url) return cb([]);
-    if (typeof Papa === 'undefined') { console.error('PapaParse missing'); cb([]); return; }
-    Papa.parse(toPublishedCsv(url), { download: true, header: true, skipEmptyLines: true, complete: function(res){ cb(res.data || []); }, error: function(){ cb([]); } });
+    if (typeof Papa === 'undefined') { 
+      console.error('PapaParse missing');
+      if (window.showAlert) window.showAlert('A required library is missing. Please contact support.', 'error');
+      cb([]); 
+      return; 
+    }
+    Papa.parse(toPublishedCsv(url), { 
+      download: true, 
+      header: true, 
+      skipEmptyLines: true, 
+      complete: function(res){ cb(res.data || []); }, 
+      error: function(err){ 
+        console.error('CSV loading error for URL: ' + url, err);
+        if (window.showAlert) window.showAlert('Failed to load site data. Please check your connection.', 'error');
+        cb([]); 
+      } 
+    });
   }
 
   // Google Drive helpers
@@ -132,7 +147,10 @@
   function renderCollections(){
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
-    if (!CFG.collections) return;
+    if (!CFG.collections) {
+      if (window.pageLoader) window.pageLoader.taskDone();
+      return;
+    }
     loadCsv(CFG.collections, function(rows){
       // New schema: collection_name, collection_sheet_gid (comma-separated gid values)
       collections = rows.map(function(r){
@@ -193,6 +211,8 @@
           renderInitialPreview();
         }
       }
+      
+      if (window.pageLoader) window.pageLoader.taskDone();
     });
   }
 
@@ -403,7 +423,10 @@
   /** Render Instagram cards from the insta sheet */
   function renderInsta(){
     var list = document.getElementById('insta-list');
-    if (!list || !CFG.insta) return;
+    if (!list || !CFG.insta) {
+      if (window.pageLoader) window.pageLoader.taskDone();
+      return;
+    }
     loadCsv(CFG.insta, function(rows){
       list.innerHTML = '';
       rows.forEach(function(r){
@@ -426,15 +449,22 @@
         
         list.appendChild(li);
       });
+      if (window.pageLoader) window.pageLoader.taskDone();
     });
   }
 
   // FOOTER
   /** Render footer contacts (email, WhatsApp) and social links; expose window.CDA_CONTACTS */
   function renderFooter(){
-    if (!CFG.footer) return;
+    if (!CFG.footer) {
+      if (window.pageLoader) window.pageLoader.taskDone();
+      return;
+    }
     loadCsv(CFG.footer, function(rows){
-      if (!rows.length) return;
+      if (!rows.length) {
+        if (window.pageLoader) window.pageLoader.taskDone();
+        return;
+      }
       var r = rows[0];
       // Socials (instagram, facebook, whatsapp from CSV)
       var social = document.getElementById('footer-social-list');
@@ -501,11 +531,14 @@
           pinterest: (r.pinterest || '').toString().trim()
         };
       } catch(_) {}
+      
+      if (window.pageLoader) window.pageLoader.taskDone();
     });
   }
 
   // Init
   document.addEventListener('DOMContentLoaded', function(){
+    if (window.pageLoader) window.pageLoader.init(3);
     renderCollections();
     renderInsta();
     renderFooter();

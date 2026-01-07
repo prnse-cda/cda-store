@@ -2064,3 +2064,107 @@ a.footer-link:is(:hover, :focus) { color: var(--bittersweet); }
 .navbar-item.has-dropdown.active .dropdown-icon {
   transform: rotate(180deg);
 }
+
+/*-----------------------------------*\
+ * #MOBILE BOTTOM NAVIGATION
+\*-----------------------------------*/
+
+.mobile-bottom-nav {
+  display: none; /* Hidden by default, shown in media query */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  box-shadow: 0 -2px 10px hsla(0, 0%, 0%, 0.1);
+  z-index: 5;
+}
+
+.mobile-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--onyx);
+  font-size: var(--fs-8);
+  padding: 8px 12px;
+  position: relative; /* For the badge */
+  flex-grow: 1;
+  text-align: center;
+}
+
+.mobile-nav-link ion-icon {
+  font-size: 22px;
+}
+
+/*-----------------------------------*\
+ * #PRELOADER
+\*-----------------------------------*/
+
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--white);
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.5s ease;
+}
+
+.preloader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.preloader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--cda-accent);
+  border-top-color: var(--cda-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mobile-nav-link:is(:hover, :focus) {
+  color: var(--bittersweet);
+}
+
+.mobile-nav-link .nav-action-badge {
+  position: absolute;
+  top: 4px;
+  right: 15%;
+  font-size: 1rem;
+  background: var(--bittersweet);
+  color: var(--white);
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+/* Show on mobile, and hide go-top */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .go-top-btn.active {
+    display: none;
+  }
+
+  /* Add padding to prevent content from being obscured by the nav bar */
+  body {
+    padding-bottom: 60px; 
+  }
+}
