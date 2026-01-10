@@ -259,6 +259,15 @@
           border-radius: 6px;
         }
 
+        .product-modal-description ul {
+          padding-left: 0;
+          list-style-position: inside;
+        }
+
+        .product-modal-description ul {
+          padding-left: 0;
+        }
+
         .product-modal-sizes {
           margin-bottom: 30px;
         }
@@ -625,7 +634,14 @@
 
     // Set product data
     title.textContent = product.name || '';
-    description.textContent = product.description || 'No description available';
+
+    const descText = product.description || 'No description available';
+    if (descText.includes('||')) {
+      const items = descText.split('||').map(item => `<li>${item.trim()}</li>`).join('');
+      description.innerHTML = `<ul>${items}</ul>`;
+    } else {
+      description.textContent = descText;
+    }
 
     // Price display
     const hasOffer = product.offer_price && product.offer_price !== '0' && product.offer_price !== '';
