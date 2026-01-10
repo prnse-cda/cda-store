@@ -310,7 +310,8 @@
         card_badge: (r.card_badge || r.cardBadge || r['card badge'] || '').toString().trim(),
         sale_status: (r.sale_status || r.saleStatus || r['sale status'] || '').toString().trim(),
         insta_link: (r.insta_link || r.instaLink || r['insta link'] || r.instagram_link || '').toString().trim(),
-        fabric_product_id: (r.fabric_product_id || '').toString().trim()
+        fabric_product_id: (r.fabric_product_id || '').toString().trim(),
+        card_button: (r.card_button || '').toString().trim()
       };
     });
   }
@@ -356,7 +357,7 @@
           '+ discHtml +'\
           '+ cardBadgeHtml +'\
           '+ saleStatusHtml +'\
-          <button class="quick-view-btn" data-action="quick" aria-label="Quick View">Quick View</button>\
+          <button class="quick-view-btn" data-action="quick" aria-label="'+ (p.card_button || 'Quick View') +'">'+ (p.card_button || 'Quick View') +'</button>\
         </figure>\
         <div class="card-content">\
           <h3 class="h3 card-title">'+ (p.name || '') +'</h3>\
