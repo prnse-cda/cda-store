@@ -225,19 +225,11 @@
     if (!group.length) { startPagination([]); return; }
     // Serve from cache if available
     if (groupCache[groupTitle]) { startPagination(groupCache[groupTitle]); return; }
-    var merged = [];
-    var left = group.length;
-    group.forEach(function(c){
-      // Use unique cache key combining product_name and csv_gid
-      var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
-      if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0){ groupCache[groupTitle]=merged; startPagination(merged); } return; }
-      plist.innerHTML = '';
-      loadCsv(collectionCsvUrl(c), function(rows){
-        var list = parseProducts(rows, c.title || c.name);
-        productCache[cacheKey] = list;
-        merged = merged.concat(list);
-        if(--left===0){ groupCache[groupTitle]=merged; startPagination(merged); }
-      });
+    
+    plist.innerHTML = ''; // Clear existing products before loading new ones
+    loadAndMerge(group, function(merged) {
+        groupCache[groupTitle] = merged;
+        startPagination(merged);
     });
   }
   // Expose globally for URL navigation
@@ -439,48 +431,54 @@
     });
   }
 
+  /** Sequentially load and merge products from a list of collections */
+  function loadAndMerge(collectionsToLoad, onComplete) {
+    var merged = [];
+    function loadNext(index) {
+        if (index >= collectionsToLoad.length) {
+            onComplete(merged);
+            return;
+        }
+        var c = collectionsToLoad[index];
+        var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
+        if (productCache[cacheKey]) {
+            merged = merged.concat(productCache[cacheKey]);
+            loadNext(index + 1);
+            return;
+        }
+        loadCsv(collectionCsvUrl(c), function(rows) {
+            var list = parseProducts(rows, c.name);
+            productCache[cacheKey] = list;
+            merged = merged.concat(list);
+            loadNext(index + 1);
+        });
+    }
+    loadNext(0);
+  }
+
   /** Select filter by collection name or All; lazy-load product sheets and merge */
   function selectFilter(label){
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
     if (!filters || !plist) return;
-    // Active state
+
+    // Set active button state
     filters.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.toggle('active', b.textContent === label); });
-    // Load
-    if (label === 'All') {
-      // fetch all (lazy) then merge
-      var pending = collections.slice();
-      var merged = [];
-      var left = pending.length; if (!left) { startPagination([]); return; }
-      pending.forEach(function(c){
-        var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
-        if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0) startPagination(merged); return; }
-        loadCsv(collectionCsvUrl(c), function(rows){ var list = parseProducts(rows, c.name); productCache[cacheKey] = list; merged = merged.concat(list); if(--left===0) startPagination(merged); });
-      });
-    } else {
-      // Find all collections with matching product_name
-      var matchingCollections = collections.filter(function(x){ return x.name === label; });
-      if (!matchingCollections.length) { startPagination([]); return; }
-      
-      // Merge products from all matching collections
-      var merged = [];
-      var left = matchingCollections.length;
-      matchingCollections.forEach(function(c){
-        var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
-        if (productCache[cacheKey]) { 
-          merged = merged.concat(productCache[cacheKey]); 
-          if(--left===0) startPagination(merged); 
-          return; 
-        }
-        plist.innerHTML = '';
-        loadCsv(collectionCsvUrl(c), function(rows){ 
-          var list = parseProducts(rows, c.name); 
-          productCache[cacheKey] = list; 
-          merged = merged.concat(list); 
-          if(--left===0) startPagination(merged); 
-        });
-      });
+
+    // Determine which collections to load
+    var collectionsToLoad = (label === 'All') 
+        ? collections.slice() 
+        : collections.filter(function(x){ return x.name === label; });
+
+    if (!collectionsToLoad.length) {
+        startPagination([]);
+        return;
     }
+    
+    plist.innerHTML = ''; // Clear previous products
+    loadAndMerge(collectionsToLoad, function(merged) {
+        startPagination(merged);
+    });
   }
   // Expose globally for URL navigation
   window.selectFilter = selectFilter;
