@@ -74,11 +74,11 @@
   /** Build Google Drive thumbnail URL for a given id */
   function driveThumb(id, size){ size = size || 1000; return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w' + size; }
   /** Convert a comma-separated token string into image URLs, resolving Drive IDs */
-  function tokenToImgs(token){
+  function tokenToImgs(token, size){
     if (!token) return [];
     return String(token).split(',').map(function(p){ return p.trim(); }).filter(Boolean).map(function(p){
       var id = extractDriveId(p);
-      return id ? driveThumb(id) : p;
+      return id ? driveThumb(id, size) : p;
     });
   }
 
@@ -87,61 +87,13 @@
   var collectionGroups = {}; // title (collection_name) -> array of collection rows
   var productCache = {}; // product_name -> array of products
   var groupCache = {}; // group title -> merged array of products
-  // Initial preview mode renders one product per collection with a View All button
 
-  function hideViewAll(){
-    var c = document.getElementById('view-all-container');
-    if (c) c.remove();
-  }
-
-  /** Append a "View All" button under the product list that loads full products */
-  function showViewAll(){
-    var plist = document.getElementById('product-list');
-    if (!plist) return;
-    hideViewAll();
-    var container = document.createElement('div');
-    container.id = 'view-all-container';
-    container.style.textAlign = 'center';
-    container.style.marginTop = '24px';
-    var btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.innerHTML = '<span>View All</span> <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>';
-    btn.addEventListener('click', function(){
-      hideViewAll();
-      try { selectFilter('All'); } catch(_){}
-      document.getElementById('product-section')?.scrollIntoView({behavior:'smooth'});
-    });
-    container.appendChild(btn);
-    var parent = plist.parentElement;
-    if (parent) parent.appendChild(container);
-  }
-
-  /** Render the first product from each collection as a lightweight preview */
-  function renderInitialPreview(){
-    var plist = document.getElementById('product-list');
-    if (!plist) return;
-    var titles = Object.keys(collectionGroups);
-    if (!titles.length) { renderProducts([]); return; }
-    var preview = [];
-    var left = titles.length;
-    titles.forEach(function(title){
-      var group = collectionGroups[title] || [];
-      var c = group[0];
-      if (!c) { if(--left===0){ renderProducts(preview); showViewAll(); PREVIEW_RENDERED=true; } return; }
-      var cacheKey = 'preview_' + (c.csv_gid || c.csv_url || '');
-      if (productCache[cacheKey]) {
-        if (productCache[cacheKey][0]) preview.push(productCache[cacheKey][0]);
-        if(--left===0){ renderProducts(preview); showViewAll(); PREVIEW_RENDERED=true; }
-        return;
-      }
-      loadCsv(collectionCsvUrl(c), function(rows){
-        var list = parseProducts(rows, c.title || c.name);
-        productCache[cacheKey] = list;
-        if (list[0]) preview.push(list[0]);
-        if(--left===0){ renderProducts(preview); showViewAll(); PREVIEW_RENDERED=true; }
-      });
-    });
-  }
+  // --- Start Pagination State ---
+  var CDA_PAGINATION_ACTIVE = false;
+  var CDA_CURRENT_PRODUCT_LIST = [];
+  var CDA_CURRENT_PAGE = 1;
+  var CDA_PAGE_SIZE = 8;
+  // --- End Pagination State ---
 
   /** Fetch collections, build filters and shop menu, render optional collection cards */
   function renderCollections(){
@@ -202,13 +154,12 @@
         });
       }
 
-      // On first load without a hash, show one product per collection with a View All button
+      // On first load, if no deep-link hash is present, default to showing the 'All' filter.
       if (filters && plist) {
         var h = window.location.hash || '';
-        if (/^#(filter|collection|product)=/i.test(h)) {
-          // Let navigation handler trigger loads
-        } else {
-          renderInitialPreview();
+        if (!/^#(filter|collection|product)=/i.test(h)) {
+          // Default to showing 'All' products, paginated.
+          selectFilter('All');
         }
       }
       
@@ -271,21 +222,21 @@
     var plist = document.getElementById('product-list');
     if (!plist) return;
     var group = collectionGroups[groupTitle] || [];
-    if (!group.length) { renderProducts([]); return; }
+    if (!group.length) { startPagination([]); return; }
     // Serve from cache if available
-    if (groupCache[groupTitle]) { renderProducts(groupCache[groupTitle]); return; }
+    if (groupCache[groupTitle]) { startPagination(groupCache[groupTitle]); return; }
     var merged = [];
     var left = group.length;
     group.forEach(function(c){
       // Use unique cache key combining product_name and csv_gid
       var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
-      if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0){ groupCache[groupTitle]=merged; renderProducts(merged); } return; }
+      if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0){ groupCache[groupTitle]=merged; startPagination(merged); } return; }
       plist.innerHTML = '';
       loadCsv(collectionCsvUrl(c), function(rows){
         var list = parseProducts(rows, c.title || c.name);
         productCache[cacheKey] = list;
         merged = merged.concat(list);
-        if(--left===0){ groupCache[groupTitle]=merged; renderProducts(merged); }
+        if(--left===0){ groupCache[groupTitle]=merged; startPagination(merged); }
       });
     });
   }
@@ -316,6 +267,69 @@
     });
   }
 
+  function createLoadMoreButton() {
+    var plist = document.getElementById('product-list');
+    if (!plist) return;
+    var existingBtn = document.getElementById('load-more-container');
+    if (existingBtn) existingBtn.remove();
+    var container = document.createElement('div');
+    container.id = 'load-more-container';
+    container.style.textAlign = 'center';
+    container.style.marginTop = '24px';
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.innerHTML = '<span>Load More</span> <ion-icon name="reload-outline" aria-hidden="true"></ion-icon>';
+    btn.addEventListener('click', renderNextPage);
+    container.appendChild(btn);
+    var parent = plist.parentElement;
+    if (parent) parent.appendChild(container);
+    container.style.display = 'none'; // Initially hidden
+  }
+
+  function renderNextPage() {
+    var btnContainer = document.getElementById('load-more-container');
+    if (!btnContainer) return;
+
+    var start = (CDA_CURRENT_PAGE - 1) * CDA_PAGE_SIZE;
+    var end = start + CDA_PAGE_SIZE;
+    var pageItems = CDA_CURRENT_PRODUCT_LIST.slice(start, end);
+
+    if (pageItems.length) {
+      // Set flag to append, then render
+      CDA_PAGINATION_ACTIVE = true;
+      renderProducts(pageItems);
+      CDA_PAGINATION_ACTIVE = false;
+      CDA_CURRENT_PAGE++;
+    }
+
+    if (end >= CDA_CURRENT_PRODUCT_LIST.length) {
+      btnContainer.style.display = 'none';
+    } else {
+      btnContainer.style.display = 'block';
+    }
+  }
+
+  function startPagination(productList) {
+    var root = document.getElementById('product-list');
+    if (!root) return;
+    
+    // DEV-NOTE: Sorting removed to preserve sheet order.
+    // productList.sort(function(a, b) {
+    //   if (a.priority && !b.priority) return -1;
+    //   if (!a.priority && b.priority) return 1;
+    //   if (a.priority_rank !== b.priority_rank) return (b.priority_rank || 0) - (a.priority_rank || 0);
+    //   return (a.name || '').localeCompare(b.name || '');
+    // });
+
+    CDA_CURRENT_PRODUCT_LIST = productList;
+    CDA_CURRENT_PAGE = 1;
+    
+    root.innerHTML = '';
+
+    createLoadMoreButton();
+    renderNextPage();
+  }
+
   function rupee(n){
     var v = Number(String(n).replace(/[^0-9.-]+/g,'')) || 0; return '₹' + v.toFixed(2);
   }
@@ -324,58 +338,109 @@
   function renderProducts(list){
     var root = document.getElementById('product-list');
     if (!root) return;
-    root.innerHTML = '';
+    // On first render of a paginated list, clear the container. Subsequent loads will append.
+    if (!CDA_PAGINATION_ACTIVE) {
+      root.innerHTML = '';
+    }
+
     list.forEach(function(p){
       try { if (window.cdRegisterProduct) window.cdRegisterProduct(p); } catch(_) {}
-      var imgs = tokenToImgs(p.images);
+      var imgs = tokenToImgs(p.images, 400);
       var main = imgs[0] || './assets/images/product-1.jpg';
       var hasOffer = !!(p.offer_price && String(p.offer_price).trim() !== '' && Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) > 0);
-      var priceHtml = hasOffer ? (rupee(p.offer_price) + ' <del>' + rupee(p.price) + '</del>') : rupee(p.price);
-      var discHtml = '';
+
+      // Create elements programmatically to prevent XSS
+      var li = document.createElement('li');
+      li.className = 'product-item';
+
+      var productCard = document.createElement('div');
+      productCard.className = 'product-card';
+      productCard.tabIndex = 0;
+
+      var figure = document.createElement('figure');
+      figure.className = 'card-banner';
+
+      var img = document.createElement('img');
+      img.src = main;
+      img.width = 312;
+      img.height = 350;
+      img.loading = 'lazy';
+      img.alt = p.name || ''; // alt is sanitized by property assignment
+      img.className = 'image-contain';
+      figure.appendChild(img);
+
+      // Discount badge
       if (hasOffer) {
         var base = Number(String(p.price).replace(/[^0-9.-]+/g,'')) || 0;
         var off = Number(String(p.offer_price).replace(/[^0-9.-]+/g,'')) || 0;
         if (base > 0 && off > 0 && off < base) {
           var pct = Math.round((1 - (off/base)) * 100);
-          discHtml = '<div class="card-badge"> -' + pct + '%</div>';
+          var discBadge = document.createElement('div');
+          discBadge.className = 'card-badge';
+          discBadge.textContent = '-' + pct + '%';
+          figure.appendChild(discBadge);
         }
       }
-      // Show card_badge on right top and sale_status below it
-      var cardBadgeHtml = '';
-      var saleStatusHtml = '';
+
+      // Top badge (e.g., "New Arrival")
       if (p.card_badge) {
-        cardBadgeHtml = '<div class="card-badge-top">'+ p.card_badge +'</div>';
+        var cardBadge = document.createElement('div');
+        cardBadge.className = 'card-badge-top';
+        cardBadge.textContent = p.card_badge;
+        figure.appendChild(cardBadge);
       }
+
+      // Sale status badge
       if (p.sale_status) {
-        saleStatusHtml = '<div class="sale-status-badge">'+ p.sale_status +'</div>';
+        var saleStatus = document.createElement('div');
+        saleStatus.className = 'sale-status-badge';
+        saleStatus.textContent = p.sale_status;
+        figure.appendChild(saleStatus);
       }
-      var li = document.createElement('li'); li.className = 'product-item';
-      li.innerHTML = '\
-      <div class="product-card" tabindex="0">\
-        <figure class="card-banner">\
-          <img src="'+ main +'" width="312" height="350" loading="lazy" alt="'+ (p.name || '') +'" class="image-contain">\
-          '+ discHtml +'\
-          '+ cardBadgeHtml +'\
-          '+ saleStatusHtml +'\
-          <button class="quick-view-btn" data-action="quick" aria-label="'+ (p.card_button || 'Quick View') +'">'+ (p.card_button || 'Quick View') +'</button>\
-        </figure>\
-        <div class="card-content">\
-          <h3 class="h3 card-title">'+ (p.name || '') +'</h3>\
-          <data class="card-price" value="'+ (hasOffer ? String(p.offer_price) : String(p.price)) +'">'+ priceHtml +'</data>\
-        </div>\
-      </div>';
-      // Attach quick view action
-      var btnQuick = li.querySelector('button[data-action="quick"]');
-      if (btnQuick) btnQuick.addEventListener('click', function(){
+
+      var quickViewBtn = document.createElement('button');
+      quickViewBtn.className = 'quick-view-btn';
+      quickViewBtn.dataset.action = 'quick';
+      var btnText = p.card_button || 'Quick View';
+      quickViewBtn.setAttribute('aria-label', btnText);
+      quickViewBtn.textContent = btnText;
+      quickViewBtn.addEventListener('click', function(){
         if (window.openProductDetail) window.openProductDetail(p.id);
       });
+      figure.appendChild(quickViewBtn);
+
+      var cardContent = document.createElement('div');
+      cardContent.className = 'card-content';
+
+      var title = document.createElement('h3');
+      title.className = 'h3 card-title';
+      title.textContent = p.name || '';
+      cardContent.appendChild(title);
+
+      var priceData = document.createElement('data');
+      priceData.className = 'card-price';
+      priceData.value = hasOffer ? String(p.offer_price).replace(/[^0-9.-]+/g,'') : String(p.price).replace(/[^0-9.-]+/g,'');
+
+      if (hasOffer) {
+        priceData.textContent = rupee(p.offer_price) + ' ';
+        var del = document.createElement('del');
+        del.textContent = rupee(p.price);
+        priceData.appendChild(del);
+      } else {
+        priceData.textContent = rupee(p.price);
+      }
+      cardContent.appendChild(priceData);
+
+      // Assemble card
+      productCard.appendChild(figure);
+      productCard.appendChild(cardContent);
+      li.appendChild(productCard);
       root.appendChild(li);
     });
   }
 
   /** Select filter by collection name or All; lazy-load product sheets and merge */
   function selectFilter(label){
-    hideViewAll();
     var filters = document.getElementById('filter-list');
     var plist = document.getElementById('product-list');
     if (!filters || !plist) return;
@@ -386,16 +451,16 @@
       // fetch all (lazy) then merge
       var pending = collections.slice();
       var merged = [];
-      var left = pending.length; if (!left) { renderProducts([]); return; }
+      var left = pending.length; if (!left) { startPagination([]); return; }
       pending.forEach(function(c){
         var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
-        if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0) renderProducts(merged); return; }
-        loadCsv(collectionCsvUrl(c), function(rows){ var list = parseProducts(rows, c.name); productCache[cacheKey] = list; merged = merged.concat(list); if(--left===0) renderProducts(merged); });
+        if (productCache[cacheKey]) { merged = merged.concat(productCache[cacheKey]); if(--left===0) startPagination(merged); return; }
+        loadCsv(collectionCsvUrl(c), function(rows){ var list = parseProducts(rows, c.name); productCache[cacheKey] = list; merged = merged.concat(list); if(--left===0) startPagination(merged); });
       });
     } else {
       // Find all collections with matching product_name
       var matchingCollections = collections.filter(function(x){ return x.name === label; });
-      if (!matchingCollections.length) { renderProducts([]); return; }
+      if (!matchingCollections.length) { startPagination([]); return; }
       
       // Merge products from all matching collections
       var merged = [];
@@ -404,7 +469,7 @@
         var cacheKey = c.name + '_' + (c.csv_gid || c.csv_url || '');
         if (productCache[cacheKey]) { 
           merged = merged.concat(productCache[cacheKey]); 
-          if(--left===0) renderProducts(merged); 
+          if(--left===0) startPagination(merged); 
           return; 
         }
         plist.innerHTML = '';
@@ -412,7 +477,7 @@
           var list = parseProducts(rows, c.name); 
           productCache[cacheKey] = list; 
           merged = merged.concat(list); 
-          if(--left===0) renderProducts(merged); 
+          if(--left===0) startPagination(merged); 
         });
       });
     }
