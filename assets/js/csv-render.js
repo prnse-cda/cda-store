@@ -92,6 +92,7 @@
   var CDA_PAGINATION_ACTIVE = false;
   var CDA_CURRENT_PRODUCT_LIST = [];
   var CDA_CURRENT_PAGE = 1;
+  var CDA_INITIAL_PAGE_SIZE = 4;
   var CDA_PAGE_SIZE = 8;
   // --- End Pagination State ---
 
@@ -282,8 +283,17 @@
     var btnContainer = document.getElementById('load-more-container');
     if (!btnContainer) return;
 
-    var start = (CDA_CURRENT_PAGE - 1) * CDA_PAGE_SIZE;
-    var end = start + CDA_PAGE_SIZE;
+    var start;
+    var end;
+
+    if (CDA_CURRENT_PAGE === 1) {
+      start = 0;
+      end = CDA_INITIAL_PAGE_SIZE;
+    } else {
+      start = CDA_INITIAL_PAGE_SIZE + (CDA_CURRENT_PAGE - 2) * CDA_PAGE_SIZE;
+      end = start + CDA_PAGE_SIZE;
+    }
+
     var pageItems = CDA_CURRENT_PRODUCT_LIST.slice(start, end);
 
     if (pageItems.length) {
